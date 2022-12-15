@@ -1,8 +1,6 @@
-use futures::future::BoxFuture;
-
 mod timer;
 mod requester;
 
 fn main() {
-    timer::run_timer();
+    timer::run_timer(requester::make_request);
 }
