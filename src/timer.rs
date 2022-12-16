@@ -8,24 +8,28 @@ use crate::requester::Monitors;
 #[tokio::main()]
 pub async fn run_timer<T>(callback: fn() -> T) -> () where T: Future<Output = Receiver<Monitors>> + Send + Sync + 'static {
 
-    task::spawn(async move {
+    let forever = task::spawn(async move {
         let mut interval = time::interval(time::Duration::from_secs(10));
         loop {
-            let (tx, rx) = oneshot::channel();
+            let (enqueue_monitors, monitor_queue) = oneshot::channel();
             
             tokio::spawn(async move {
-                let idk = callback().await;
-                let resp = idk.await.unwrap();
-                tx.send(resp).unwrap();
+                let request_channel_receiver = callback().await;
+                let resp = request_channel_receiver.await.unwrap();
+                enqueue_monitors.send(resp).unwrap();
             });
 
             interval.tick().await;
 
-            let res = rx.await.unwrap();
+            let res = monitor_queue.await.unwrap();
             
             println!("Queue: {:?}", &res);
         }
     });
 
-    // forever.await; 
+    match forever.await {
+        Ok(()) => (),
+        Err(some_error) => println!("{}", some_error),
+    };
+
 }
