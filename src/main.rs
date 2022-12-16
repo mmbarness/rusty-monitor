@@ -1,7 +1,5 @@
-use std::{collections::HashMap, sync::Mutex};
 use bot_configs::BotConfig;
 use poise::serenity_prelude;
-type Error = Box<dyn std::error::Error + Send + Sync>;
 use crate::structs::Data;
 mod timer;
 mod requester;
