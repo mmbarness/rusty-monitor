@@ -1,22 +1,21 @@
-
-use crate::structs::{Command, CommandResult, Data};
-use anyhow::Error;
-use poise::Context;
-// type Error = Box<dyn std::error::Error + Send + Sync>;
-use serenity::model::user::User;
-
-/// Displays your or another user's account creation date
-#[poise::command(slash_command)]
-pub async fn help(
-    ctx: Context<'_, Data, Error>,
-    #[description = "Selected user"] user: Option<User>,
+/// Show this help menu
+#[poise::command(prefix_command, track_edits, slash_command)]
+async fn help(
+    ctx: Context<'_>,
+    #[description = "Specific command to show help about"]
+    #[autocomplete = "poise::builtins::autocomplete_command"]
+    command: Option<String>,
 ) -> Result<(), Error> {
-    let u = user.as_ref().unwrap_or_else(|| ctx.author());
-    let response = format!("{}'s account was created at {}", u.name, u.created_at());
-    ctx.say(response).await?;
+    poise::builtins::help(
+        ctx,
+        command.as_deref(),
+        poise::builtins::HelpConfiguration {
+            extra_text_at_bottom: "\
+This is an example bot made to showcase features of my custom Discord bot framework",
+            show_context_menu_commands: true,
+            ..Default::default()
+        },
+    )
+    .await?;
     Ok(())
-}
-
-pub fn commands() -> [Command; 1] {
-    [help()]
 }

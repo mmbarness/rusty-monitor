@@ -43,6 +43,7 @@ impl MProberConfigs {
             }
         }
     }
+
     fn polling_frequency() -> time::Duration {    
         let ok_val = match std::env::var("POLLING_FREQUENCY") {
             Ok(address) => address,
@@ -62,6 +63,7 @@ impl MProberConfigs {
 
         return duration;
     }
+    
     fn port() -> u64 {    
         return match std::env::var("PORT") {
             Ok(address) => address.parse::<u64>().expect("Error parsing num from PORT value"),

@@ -1,24 +1,19 @@
 use std::{borrow::Cow, collections::BTreeMap, sync::Arc};
-
 use poise::serenity_prelude::{self as serenity, json::prelude as json};
 
-pub use anyhow::{Error, Result};
 
-use crate::mprober_configs::MProberConfigs;
-pub struct Data {
+pub type Error = Box<dyn std::error::Error + Send + Sync>;
+pub struct BotData {
     pub mprober_configs: MProberConfigs,
+    pub bot_configs: BotConfig,
 }
 
-impl Data {
-
-}
-
-pub type Command = poise::Command<Data, CommandError>;
-pub type Context<'a> = poise::Context<'a, Data, Error>;
-pub type PrefixContext<'a> = poise::PrefixContext<'a, Data, CommandError>;
-pub type ApplicationContext<'a> = poise::ApplicationContext<'a, Data, CommandError>;
+pub type Command = poise::Command<BotData, CommandError>;
+pub type Context<'a> = poise::Context<'a, BotData, Error>;
+pub type PrefixContext<'a> = poise::PrefixContext<'a, BotData, CommandError>;
+pub type ApplicationContext<'a> = poise::ApplicationContext<'a, BotData, CommandError>;
 
 pub type CommandError = Error;
 pub type CommandResult<E=Error> = Result<(), E>;
-pub type Framework = poise::Framework<Data, CommandError>;
-pub type FrameworkContext<'a> = poise::FrameworkContext<'a, Data, CommandError>;
+pub type Framework = poise::Framework<BotData, CommandError>;
+pub type FrameworkContext<'a> = poise::FrameworkContext<'a, BotData, CommandError>;

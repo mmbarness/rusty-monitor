@@ -1,3 +1,8 @@
-use crate::structs::{Context, Command, CommandResult};
+mod help;
+mod register;
 
-pub mod help;
+#[path ="."]
+pub mod commands {
+    pub mod help;
+    pub mod register;
+}

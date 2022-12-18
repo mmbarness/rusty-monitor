@@ -1,55 +1,94 @@
-use bot_configs::BotConfig;
-use poise::serenity_prelude;
-use crate::structs::Data;
-mod timer;
-mod requester;
-mod mprober_schemas;
-mod mprober_configs;
-mod bot_configs;
+
+#![warn(clippy::str_to_string)]
+mod configs;
 mod commands;
 mod structs;
-mod traits;
+use configs::configs::{bot_configs, mprober_configs};
+use poise::serenity_prelude as serenity;
+use std::{collections::HashMap, env::var, sync::Mutex, time::Duration};
+use poise::serenity_prelude::GatewayIntents;
+type Error = Box<dyn std::error::Error + Send + Sync>;
+type Context<'a> = poise::Context<'a, Data, Error>;
 
-#[allow(unused_doc_comments)]
-#[tokio::main]
-async fn main() {
+async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
+    match error {
+        poise::FrameworkError::Setup { error, .. } => panic!("Failed to start bot: {:?}", error),
+        poise::FrameworkError::Command { error, ctx } => {
+            println!("Error in command `{}`: {:?}", ctx.command().name, error,);
+        }
+        error => {
+            if let Err(e) = poise::builtins::on_error(error).await {
+                println!("Error while handling error: {}", e)
+            }
+        }
+    }
+}
+
+fn main() -> Result<(), Error>{
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()?
+        .block_on(_main());
+    Ok(())
+}
+
+async fn _main() {
+
+    tracing_subscriber::fmt::init();
+    let configs = configs::configs;
+    let bot_configs = bot_configs::BotConfig::load();
     let mprober_configs = mprober_configs::MProberConfigs::load();
-    let bot_configs = BotConfig::load();
-
-    let intents = serenity_prelude::GatewayIntents::non_privileged()
-        | serenity_prelude::GatewayIntents::MESSAGE_CONTENT;
-
-    let data = Data {
-        mprober_configs,
+    let data = structs::BotData { 
+        bot_configs,
+        mprober_configs
     };
-    // Build our client.
-    let client = poise::Framework::builder()
+    
+    let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
+
+    poise::Framework::builder()
         .token(&bot_configs.token)
-        .intents(intents)
-        .options(poise::FrameworkOptions {
-            commands: vec![
-                commands::help::help(),
-            ],
-            ..Default::default()
-        })
-        .setup(move |_ctx, _ready, _framework| {
+        .user_data_setup(move |_ctx, _ready, _framework| {
             Box::pin(async move {
                 Ok(data)
             })
         })
-        .build()
+        .options(poise::FrameworkOptions {
+            commands: vec![
+                commands::commands::help(),
+                commands::commands::register(),
+            ],
+            prefix_options: poise::PrefixFrameworkOptions {
+                prefix: Some("~~~~~".into()),
+                edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),
+                additional_prefixes: vec![
+                    poise::Prefix::Literal("hey bot"),
+                ],
+                ..Default::default()
+            },
+            /// This code is run before every command
+            pre_command: |ctx| {
+                Box::pin(async move {
+                    println!("Executing command {}...", ctx.command().qualified_name);
+                })
+            },
+            on_error: |error| Box::pin(on_error(error)),
+            /// This code is run after a command if it was successful (returned Ok)
+            post_command: |ctx| {
+                Box::pin(async move {
+                    println!("Executed command {}!", ctx.command().qualified_name);
+                })
+            },
+            /// Every command invocation must pass this check to continue execution
+            command_check: Some(|ctx| {
+                Box::pin(async move {
+                    return Ok(true);
+                })
+            }),
+            ..Default::default()
+        })
+        .intents(intents)
+        .run()
         .await
-        .expect("Error creating client");
+        .unwrap();
 
-
-    if let Err(why) = client.start().await {
-        println!("Client error: {:?}", why);
-    }
 }
-
-// fn main() {
-    // also going to need to pass the timer a Sender to message the discord client the monitor data
-    // maybe a group of senders
-    // let configs = mprober_configs::MProberConfigs::load();
-    // timer::run_timer(requester::default_request);
-// }
