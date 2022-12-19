@@ -1,7 +1,6 @@
 use std::{borrow::Cow, collections::BTreeMap, sync::Arc};
 use poise::serenity_prelude::{self as serenity, json::prelude as json};
 
-
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
 pub struct BotData {
     pub mprober_configs: MProberConfigs,
@@ -17,3 +16,8 @@ pub type CommandError = Error;
 pub type CommandResult<E=Error> = Result<(), E>;
 pub type Framework = poise::Framework<BotData, CommandError>;
 pub type FrameworkContext<'a> = poise::FrameworkContext<'a, BotData, CommandError>;
+
+#[derive(Debug)]
+pub struct Monitors {
+    cpu: Result<HashMap<std::string::String, Value>, reqwest::Error>
+}

@@ -3,6 +3,8 @@
 mod configs;
 mod commands;
 mod structs;
+mod mprober_api;
+mod timer;
 use configs::configs::{bot_configs, mprober_configs};
 use poise::serenity_prelude as serenity;
 use std::{collections::HashMap, env::var, sync::Mutex, time::Duration};

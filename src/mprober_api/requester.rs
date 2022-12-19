@@ -3,14 +3,10 @@ use tokio::sync::oneshot::Receiver;
 use tokio::sync::oneshot;
 use serde_json::{Value};
 use std::thread;
-
+use crate::structs;
 use crate::mprober_schemas::Endpoints;
-#[derive(Debug)]
-pub struct Monitors {
-    cpu: Result<HashMap<std::string::String, Value>, reqwest::Error>
-}
 
-pub async fn default_request() -> Receiver<Monitors> {
+pub async fn default_request() -> Receiver<structs::Monitors> {
     let resp = match reqwest::get("http://100.84.247.97:8000/api/all")
         .await
         .unwrap()

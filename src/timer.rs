@@ -2,11 +2,11 @@ use tokio::sync::oneshot::Receiver;
 use tokio::{time, task};
 use tokio::sync::oneshot;
 use std::future::Future;
-
-use crate::requester::Monitors;
+use crate::mprober_api::mprober_api;
+use crate::structs;
 
 #[tokio::main()]
-pub async fn run_timer<T>(callback: fn() -> T) -> () where T: Future<Output = Receiver<Monitors>> + Send + Sync + 'static {
+pub async fn run_timer<T>(callback: fn() -> T) -> () where T: Future<Output = Receiver<structs::Monitors>> + Send + Sync + 'static {
 
     let forever = task::spawn(async move {
         let mut interval = time::interval(time::Duration::from_secs(10));
