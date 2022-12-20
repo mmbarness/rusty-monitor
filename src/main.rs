@@ -6,11 +6,11 @@ mod structs;
 mod mprober_api;
 mod timer;
 use configs::configs::{bot_configs, mprober_configs};
+use structs::{Context, Framework};
 use poise::serenity_prelude as serenity;
 use std::{collections::HashMap, env::var, sync::Mutex, time::Duration};
 use poise::serenity_prelude::GatewayIntents;
 type Error = Box<dyn std::error::Error + Send + Sync>;
-type Context<'a> = poise::Context<'a, Data, Error>;
 
 async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     match error {
@@ -42,14 +42,14 @@ async fn _main() {
     let mprober_configs = mprober_configs::MProberConfigs::load();
     let data = structs::BotData { 
         bot_configs,
-        mprober_configs
+        mprober_configs,
     };
     
     let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
 
     poise::Framework::builder()
         .token(&bot_configs.token)
-        .user_data_setup(move |_ctx, _ready, _framework| {
+        .user_data_setup(move |_ctx: Context, _ready, _framework:Framework| {
             Box::pin(async move {
                 Ok(data)
             })
@@ -58,6 +58,7 @@ async fn _main() {
             commands: vec![
                 commands::commands::help(),
                 commands::commands::register(),
+                commands::commands::snapshot(),
             ],
             prefix_options: poise::PrefixFrameworkOptions {
                 prefix: Some("~~~~~".into()),
@@ -68,7 +69,7 @@ async fn _main() {
                 ..Default::default()
             },
             /// This code is run before every command
-            pre_command: |ctx| {
+            pre_command: |ctx:Context| {
                 Box::pin(async move {
                     println!("Executing command {}...", ctx.command().qualified_name);
                 })

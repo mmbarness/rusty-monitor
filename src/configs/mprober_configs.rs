@@ -1,7 +1,6 @@
 use core::panic;
 
 use dotenv::{ dotenv };
-use crate::mprober_schemas::Endpoints;
 use tokio::{time};
 pub struct MProberConfigs {
     pub address: String,

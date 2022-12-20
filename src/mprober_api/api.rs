@@ -1,10 +1,9 @@
 use crate::configs::configs::mprober_configs::MProberConfigs;
-
-use super::mprober_api::requester;
+use super::requester;
 
 pub struct MProberAPI {
     pub configs: MProberConfigs,
-    pub request: requester,
+    pub requester: requester,
 }
 
 impl MProberAPI {
@@ -12,6 +11,6 @@ impl MProberAPI {
         let configs = MProberConfigs::load();
         let request = requester;
 
-        MProberAPI { configs, request }
+        MProberAPI { configs, requester: requester }
     }
 }
