@@ -1,3 +1,3 @@
 pub mod help;
 pub mod register;
-pub mod snapshot;
+pub mod cpu;

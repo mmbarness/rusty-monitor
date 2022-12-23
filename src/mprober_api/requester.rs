@@ -1,25 +1,56 @@
-use std::collections::{HashMap};
+use std::{collections::{HashMap}, hash::Hash};
+use reqwest::{Response};
+use reqwest::header;
+use serde_json::Value;
 use tokio::sync::oneshot::Receiver;
 use tokio::sync::oneshot;
-use serde_json::{Value};
 use std::thread;
-use crate::structs;
 
-pub async fn default_request() -> Receiver<structs::Monitors> {
-    let resp = match reqwest::get("http://100.84.247.97:8000/api/all")
-        .await
-        .unwrap()
-        .json::<HashMap<String, Value>>()
-        .await {
-            Ok(v) => Monitors { cpu: Ok(v) },
-            Err(e) => Monitors { cpu: Err(e) }
-        };
+use super::schemas::{CPUs, Load};
 
-    let (tx, rx) = oneshot::channel();
+pub struct Requester {}
 
-    thread::spawn(move|| {
-        tx.send(resp).unwrap();
-    });
+impl Requester {
+    pub async fn cpu() -> Receiver<CPUs> {
 
-    return rx;
+        let mut headers = header::HeaderMap::new();
+        headers.insert(header::AUTHORIZATION, header::HeaderValue::from_static("5563"));
+
+        // get a client builder
+        let client = match reqwest::Client::builder()
+            .default_headers(headers)
+            .build() {
+                Ok(c) => c,
+                Err(e) => {
+                    panic!("error building reqwest client");
+                }
+            };
+
+        let resp:Response = match client.get("http://100.84.247.97:8000/api/cpu")
+            .send()
+            .await {
+                Ok(resp) => {
+                    if resp.status().is_success() {
+                        println!("success!");
+                    }
+                    let string = stringify!(resp);
+                    println!("#{string}");
+                    resp
+                },
+                Err(e) => {
+                    println!("error making request to /cpu");
+                    panic!("oopsie daisy: #{}", e);
+                }
+            };
+
+        let cpu = CPUs::load(resp).await;
+
+        let (tx, rx) = oneshot::channel();
+    
+        thread::spawn(move|| {
+            tx.send(cpu).unwrap();
+        });
+    
+        return rx;
+    }
 }

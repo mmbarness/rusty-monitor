@@ -1,5 +1,5 @@
 use dotenv::{ dotenv };
-use gnomeutils::serenity::{GuildId, Guild};
+use gnomeutils::serenity::{GuildId};
 
 pub struct BotConfig {
     pub token: String,

@@ -1,10 +1,12 @@
-use std::{borrow::Cow, collections::BTreeMap, sync::Arc};
-use poise::serenity_prelude::{self as serenity, json::prelude as json};
+use std::collections::HashMap;
+
+use crate::{configs::{bot_configs::BotConfig,mprober_configs::MProberConfigs}, mprober_api::{schemas::CPU, api::MProberAPI}};
 
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
 pub struct BotData {
     pub mprober_configs: MProberConfigs,
     pub bot_configs: BotConfig,
+    pub mprober_api: MProberAPI,
 }
 
 pub type Command = poise::Command<BotData, CommandError>;
@@ -19,5 +21,5 @@ pub type FrameworkContext<'a> = poise::FrameworkContext<'a, BotData, CommandErro
 
 #[derive(Debug)]
 pub struct Monitors {
-    cpu: Result<HashMap<std::string::String, Value>, reqwest::Error>
+    cpu: Result<HashMap<std::string::String, CPU>, reqwest::Error>
 }

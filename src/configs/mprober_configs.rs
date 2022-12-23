@@ -1,7 +1,9 @@
 use core::panic;
-
-use dotenv::{ dotenv };
+use dotenv::{dotenv};
 use tokio::{time};
+
+use crate::mprober_api::schemas::Endpoints;
+
 pub struct MProberConfigs {
     pub address: String,
     pub port: u64,

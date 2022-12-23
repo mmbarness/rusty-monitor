@@ -1,8 +1,8 @@
-use crate::structs::Context;
+use crate::structs::{Context, Error};
 
 /// Show this help menu
-#[poise::command(prefix_command, track_edits, slash_command)]
-async fn help(
+#[poise::command(track_edits, slash_command)]
+pub async fn help(
     ctx: Context<'_>,
     #[description = "Specific command to show help about"]
     #[autocomplete = "poise::builtins::autocomplete_command"]

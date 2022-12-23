@@ -1,9 +1,8 @@
+use crate::{ structs, mprober_api };
 use tokio::sync::oneshot::Receiver;
-use tokio::{time, task};
+use tokio::{ time, task };
 use tokio::sync::oneshot;
 use std::future::Future;
-use crate::mprober_api::mprober_api;
-use crate::structs;
 
 #[tokio::main()]
 pub async fn run_timer<T>(callback: fn() -> T) -> () where T: Future<Output = Receiver<structs::Monitors>> + Send + Sync + 'static {
@@ -18,11 +17,8 @@ pub async fn run_timer<T>(callback: fn() -> T) -> () where T: Future<Output = Re
                 let resp = request_channel_receiver.await.unwrap();
                 enqueue_monitors.send(resp).unwrap();
             });
-
             interval.tick().await;
-
             let res = monitor_queue.await.unwrap();
-            
             println!("Queue: {:?}", &res);
         }
     });
