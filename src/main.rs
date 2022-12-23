@@ -8,7 +8,7 @@ mod mprober_api_resource_structs;
 mod timer;
 use mprober_api::api::MProberAPI;
 use configs::{bot_configs::BotConfig, mprober_configs::MProberConfigs};
-use structs::{Context, Framework, BotData};
+use structs::{BotData};
 use std::time::Duration;
 use poise::serenity_prelude::GatewayIntents;
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -63,7 +63,7 @@ async fn _main() {
         .options(poise::FrameworkOptions {
             commands: vec![
                 commands::help::help(),
-                commands::cpu::cpu_status(),
+                commands::cpu::cpu_info(),
                 commands::register::register(),
             ],
             prefix_options: poise::PrefixFrameworkOptions {

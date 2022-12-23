@@ -11,7 +11,7 @@ use crate::mprober_api_resource_structs::cpu::CPUs;
 pub struct Requester {}
 
 impl Requester {
-    pub async fn cpu() -> Receiver<CPUs> {
+    pub async fn cpu(&self) -> Receiver<CPUs> {
 
         let mut headers = header::HeaderMap::new();
         headers.insert(header::AUTHORIZATION, header::HeaderValue::from_static("5563"));

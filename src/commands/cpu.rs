@@ -1,12 +1,9 @@
-use crate::mprober_api::api::MProberAPI;
 use crate::{structs::Context, Error};
 use std::convert::From;
-use crate::{configs::mprober_configs::MProberConfigs, mprober_api};
 use tokio::sync::oneshot;
-use std::fmt::Write as _;
 
 #[poise::command(track_edits, slash_command)]
-pub async fn cpu_status(
+pub async fn cpu_info(
     ctx: Context<'_>,
     #[description = "whats up with my cpu?"]
     #[autocomplete = "poise::builtins::autocomplete_command"]
@@ -18,12 +15,11 @@ pub async fn cpu_status(
 
     let (enqueue_monitors, monitor_queue) = oneshot::channel();
             
-    let request_channel_receiver = mprober_api::requester::Requester::cpu().await;
+    let request_channel_receiver = mprober_api.requester.cpu().await;
     let resp = request_channel_receiver.await.unwrap();
     enqueue_monitors.send(resp).unwrap();
 
     let res = monitor_queue.await.unwrap();
-    println!("Queue: {:?}", &res);
 
     let cpus = res.cpus;
     let cpu_1 = match cpus.first() {
