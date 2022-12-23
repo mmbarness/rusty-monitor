@@ -8,7 +8,7 @@ use std::fmt::Write as _;
 #[poise::command(track_edits, slash_command)]
 pub async fn cpu_status(
     ctx: Context<'_>,
-    #[description = "Give me a snapshot of my resources"]
+    #[description = "whats up with my cpu?"]
     #[autocomplete = "poise::builtins::autocomplete_command"]
     command: Option<String>,
 ) -> Result<(), Error> {
@@ -34,21 +34,25 @@ pub async fn cpu_status(
     };
 
     let cores = cpu_1.cores.to_string();
-    let cores_response = format!("num of cores: #{cores}");
+    let cores_response = format!("num of cores: {cores}");
     
     let mhz_average = cpu_1.mhz.iter().fold(0.00, |sum, val| sum + val);
-    let mhz_response = format!("num of cores: #{mhz_average}");
+    let mhz_response = format!("mhz average: {mhz_average}");
 
     let model_name = cpu_1.model_name.to_string();
-    let model_name_response = format!("num of cores: #{model_name}");
+    let model_name_response = format!("cpu model: {model_name}");
 
     let threads = cpu_1.threads;
-    let threads_response = format!("num of cores: #{threads}");
+    let threads_response = format!("threads: {threads}");
 
-    ctx.say(cores_response).await?;
-    ctx.say(mhz_response).await?;
-    ctx.say(model_name_response).await?;
-    ctx.say(threads_response).await?;
+    let response = "```\n".to_owned()
+            + &cores_response.to_string() + ", "
+            + &mhz_response.to_string() + ", "
+            + &model_name_response.to_string() + ", "
+            + &threads_response.to_string()
+            + "```";
+
+    ctx.say(response).await?;
 
     Ok(())
 }

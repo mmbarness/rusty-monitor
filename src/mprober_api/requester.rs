@@ -5,8 +5,8 @@ use serde_json::Value;
 use tokio::sync::oneshot::Receiver;
 use tokio::sync::oneshot;
 use std::thread;
-
-use super::schemas::{CPUs, Load};
+use crate::mprober_api_resource_structs::shared_traits::Load;
+use crate::mprober_api_resource_structs::cpu::CPUs;
 
 pub struct Requester {}
 
@@ -42,7 +42,7 @@ impl Requester {
                     panic!("oopsie daisy: #{}", e);
                 }
             };
-
+        
         let cpu = CPUs::load(resp).await;
 
         let (tx, rx) = oneshot::channel();

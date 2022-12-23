@@ -4,6 +4,7 @@ mod configs;
 mod commands;
 mod structs;
 mod mprober_api;
+mod mprober_api_resource_structs;
 mod timer;
 use mprober_api::api::MProberAPI;
 use configs::{bot_configs::BotConfig, mprober_configs::MProberConfigs};
