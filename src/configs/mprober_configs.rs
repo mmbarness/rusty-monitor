@@ -2,10 +2,10 @@ use core::panic;
 use dotenv::{dotenv};
 use tokio::{time};
 
-use crate::mprober_api::schemas::Endpoints;
-
+use crate::mprober_api::{schemas::Endpoints, client::Client};
 pub struct MProberConfigs {
     pub address: String,
+    pub api_key: String,
     pub port: u64,
     pub polling_frequency: time::Duration,
 }
@@ -15,11 +15,13 @@ impl MProberConfigs {
         Self::env_vars();
 
         let address = Self::address();
+        let api_key = Self::api_key();
         let port = Self::port();
         let polling_frequency = Self::polling_frequency();
 
         MProberConfigs { 
             address,
+            api_key,
             port,
             polling_frequency,
         }
@@ -41,6 +43,15 @@ impl MProberConfigs {
             Ok(address) => address,
             Err(_) => {
                 panic!("Error accessing server address in .env")
+            }
+        }
+    }
+
+    fn api_key() -> String {    
+        match std::env::var("API_KEY") {
+            Ok(api_key) => api_key,
+            Err(_) => {
+                panic!("Error accessing api key in .env")
             }
         }
     }

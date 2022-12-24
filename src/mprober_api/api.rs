@@ -1,15 +1,24 @@
 use crate::{configs::mprober_configs::MProberConfigs};
 
-use super::{requester::Requester};
+use super::{requester::Request, client::Client};
 
 pub struct MProberAPI {
     pub configs: MProberConfigs,
-    pub requester: Requester,
+    pub requester: Request,
 }
 
 impl MProberAPI {
     pub fn load() -> MProberAPI {
         let configs = MProberConfigs::load();
-        MProberAPI { configs, requester: Requester {} }
+        let client = Self::client(&configs);
+        MProberAPI { configs, requester: Self::requester(client) }
+    }
+
+    fn client(configs: &MProberConfigs) -> Client {
+        Client { api_key: configs.api_key.clone() }
+    }
+
+    fn requester(client: Client) -> Request {
+        Request { client }
     }
 }

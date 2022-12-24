@@ -1,5 +1,5 @@
 pub mod cpu;
-pub mod dateTime;
+pub mod date_time;
 pub mod memory;
 pub mod network;
 pub mod os;

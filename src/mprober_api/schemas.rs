@@ -1,6 +1,5 @@
 use serde::Deserialize;
-
-use crate::mprober_api_resource_structs::{shared_traits::Resource};
+use crate::mprober_api_resources::{shared_traits::Resource};
 
 pub trait Print {
     fn print(&self) -> String;

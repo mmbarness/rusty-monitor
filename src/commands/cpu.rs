@@ -15,7 +15,7 @@ pub async fn cpu_info(
 
     let (enqueue_monitors, monitor_queue) = oneshot::channel();
             
-    let request_channel_receiver = mprober_api.requester.cpu().await;
+    let request_channel_receiver = mprober_api.requester.cpus(&api_configs).await;
     let resp = request_channel_receiver.await.unwrap();
     enqueue_monitors.send(resp).unwrap();
 
