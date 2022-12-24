@@ -4,7 +4,7 @@ use tokio::sync::oneshot;
 use std::thread;
 use crate::configs::mprober_configs::MProberConfigs;
 use crate::{mprober_api_resources::shared_traits::Load};
-use crate::mprober_api_resources::cpu::CPUs;
+use crate::mprober_api_resources::cpu::{CPUs, CPUsDetect};
 use super::client::Client;
 
 pub struct Request {
@@ -39,5 +39,23 @@ impl Request {
         return cpu;
     }
 
+    pub async fn cpu_load(&self, configs: &MProberConfigs) -> CPUsDetect{
+        let client = self.client.new();
+        let address = configs.address.clone() + "/api/cpu-detect";
+        let resp:Response = match client.get(address)
+            .send()
+            .await {
+                Ok(resp) => {
+                    if resp.status().is_success() {
+                        println!("api request successful");
+                    };
+                    resp
+                },
+                Err(e) => {
+                    panic!("error making request to /cpu: #{}", e)
+                }
+            };
+        CPUsDetect::load(resp).await
+    }
     
 }

@@ -3,6 +3,7 @@
 mod configs;
 mod commands;
 mod structs;
+mod compute;
 mod mprober_api;
 mod mprober_api_resources;
 mod timer;
@@ -65,6 +66,7 @@ async fn _main() {
             commands: vec![
                 commands::help::help(),
                 commands::cpu::cpu_info(),
+                commands::cpu::cpu_load(),
                 commands::register::register(),
             ],
             prefix_options: poise::PrefixFrameworkOptions {

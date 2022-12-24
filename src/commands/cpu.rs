@@ -1,10 +1,10 @@
-use crate::{structs::Context, Error};
+use crate::{structs::Context, Error, compute::cpu::Compute};
 use std::convert::From;
 
 #[poise::command(track_edits, slash_command)]
 pub async fn cpu_info(
     ctx: Context<'_>,
-    #[description = "whats up with my cpu?"]
+    #[description = "give me basic info about my cpu"]
     #[autocomplete = "poise::builtins::autocomplete_command"]
     command: Option<String>,
 ) -> Result<(), Error> {
@@ -39,6 +39,37 @@ pub async fn cpu_info(
             + &threads_response.to_string()
             + "```";
 
+    ctx.say(response).await?;
+
+    Ok(())
+}
+
+#[poise::command(track_edits, slash_command)]
+pub async fn cpu_load(
+    ctx: Context<'_>,
+    #[description = "whats happening with my cpu right now"]
+    command: Option<String>,
+) -> Result<(), Error> {
+
+    match ctx.defer().await {
+        Ok(_) => {},
+        Err(_) => {
+            panic!("unable to defer discord resp")
+        }
+    }
+
+    let api_configs = &ctx.data().mprober_configs;
+    let mprober_api = &ctx.data().mprober_api;
+            
+    let cpus = mprober_api.requester.cpu_load(&api_configs).await;
+
+    let cpus_average = Compute::avg_load(&cpus.cpus_stat);
+    let cpus_average_resp = format!("average load across cores: {}", Compute::percentage(&cpus_average));
+  
+    let response = "```\n".to_owned()
+    + &cpus_average_resp.to_string() + ", "
+    + "```";
+    
     ctx.say(response).await?;
 
     Ok(())
