@@ -6,7 +6,7 @@ mod structs;
 mod mprober_api;
 mod mprober_api_resources;
 mod timer;
-mod channel_wrap;
+mod thread_channel;
 use mprober_api::api::MProberAPI;
 use configs::{bot_configs::BotConfig, mprober_configs::MProberConfigs};
 use structs::{BotData};

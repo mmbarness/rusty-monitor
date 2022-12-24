@@ -1,6 +1,5 @@
 use crate::{structs::Context, Error};
 use std::convert::From;
-use tokio::sync::oneshot;
 
 #[poise::command(track_edits, slash_command)]
 pub async fn cpu_info(
@@ -9,20 +8,12 @@ pub async fn cpu_info(
     #[autocomplete = "poise::builtins::autocomplete_command"]
     command: Option<String>,
 ) -> Result<(), Error> {
-    let bot_data = &ctx.data().bot_configs;
+
     let api_configs = &ctx.data().mprober_configs;
     let mprober_api = &ctx.data().mprober_api;
-
-    let (enqueue_monitors, monitor_queue) = oneshot::channel();
             
-    let request_channel_receiver = mprober_api.requester.cpus(&api_configs).await;
-    let resp = request_channel_receiver.await.unwrap();
-    enqueue_monitors.send(resp).unwrap();
-
-    let res = monitor_queue.await.unwrap();
-
-    let cpus = res.cpus;
-    let cpu_1 = match cpus.first() {
+    let cpus = mprober_api.requester.cpus(&api_configs).await;
+    let cpu_1 = match cpus.cpus.first() {
         Some(cpu) => cpu,
         None => {
             panic!("no cpus returned in response");

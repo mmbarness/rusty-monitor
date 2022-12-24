@@ -12,7 +12,7 @@ pub struct Request {
 }
 
 impl Request {
-    pub async fn cpus(&self, configs: &MProberConfigs) -> Receiver<CPUs> {
+    pub async fn cpus(&self, configs: &MProberConfigs) -> CPUs{
         let client = self.client.new();
         // "http://100.84.247.97:8000/api/cpu"
         let address = configs.address.clone() + "/api/cpu";
@@ -31,13 +31,13 @@ impl Request {
             };
         
         let cpu = CPUs::load(resp).await;
-
-        let (tx, rx) = oneshot::channel();
     
-        thread::spawn(move|| {
-            tx.send(cpu).unwrap();
-        });
+        // thread::spawn(move|| {
+        //     tx.send(cpu).unwrap();
+        // });
     
-        return rx;
+        return cpu;
     }
+
+    
 }

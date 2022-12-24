@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use serde::Deserialize;
 use reqwest::Response;
 use tokio::sync::oneshot;
-use crate::{mprober_api::schemas::MProberResponse, channel_wrap::wrapper::{Wrap, Wrapper}};
+use crate::{mprober_api::schemas::MProberResponse, thread_channel::wrapper::{Wrap, Wrapper}};
 
 use super::shared_traits::{Resource, Load};
 
