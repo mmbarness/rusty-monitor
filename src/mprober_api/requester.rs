@@ -1,11 +1,9 @@
 use reqwest::{Response};
-use tokio::sync::oneshot::Receiver;
-use tokio::sync::oneshot;
-use std::thread;
 use crate::configs::mprober_configs::MProberConfigs;
 use crate::{mprober_api_resources::shared_traits::Load};
 use crate::mprober_api_resources::cpu::{CPUs, CPUsDetect};
 use super::client::Client;
+use super::schemas::Endpoints;
 
 pub struct Request {
     pub client: Client
@@ -14,8 +12,7 @@ pub struct Request {
 impl Request {
     pub async fn cpus(&self, configs: &MProberConfigs) -> CPUs{
         let client = self.client.new();
-        // "http://100.84.247.97:8000/api/cpu"
-        let address = configs.address.clone() + "/api/cpu";
+        let address = (configs.build_address)(&Endpoints::CPU);
         let resp:Response = match client.get(address)
             .send()
             .await {
@@ -32,16 +29,12 @@ impl Request {
         
         let cpu = CPUs::load(resp).await;
     
-        // thread::spawn(move|| {
-        //     tx.send(cpu).unwrap();
-        // });
-    
         return cpu;
     }
 
     pub async fn cpu_load(&self, configs: &MProberConfigs) -> CPUsDetect{
         let client = self.client.new();
-        let address = configs.address.clone() + "/api/cpu-detect";
+        let address = (configs.build_address)(&Endpoints::CpuDetect);
         let resp:Response = match client.get(address)
             .send()
             .await {

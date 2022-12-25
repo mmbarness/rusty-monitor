@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use strum_macros::EnumString;
 use crate::mprober_api_resources::{shared_traits::Resource};
 
 pub trait Print {
@@ -11,6 +12,8 @@ pub struct MProberResponse<D: Resource> {
     pub data: D,
 }
 
+#[derive(Eq, Hash, Debug, PartialEq, EnumString)]
+#[strum(ascii_case_insensitive)]
 pub enum Endpoints {
     Hostname,
     Kernel,
