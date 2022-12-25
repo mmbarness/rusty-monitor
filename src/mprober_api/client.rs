@@ -1,7 +1,7 @@
 use reqwest::header;
 
 pub struct Client {
-    pub api_key: String
+    pub api_key: String 
 }
 
 impl Client {

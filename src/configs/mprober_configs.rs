@@ -45,16 +45,16 @@ impl MProberConfigs {
 
     fn endpoints() -> HashMap<Endpoints, String> {
         HashMap::from([
-            (Endpoints::Hostname, "api/hostname".to_string()),
-            (Endpoints::Kernel, "api/kernel".to_string()),
-            (Endpoints::Uptime, "api/uptime".to_string()),
-            (Endpoints::Time, "api/time".to_string()),
-            (Endpoints::CPU, "api/cpu".to_string()),
-            (Endpoints::CpuDetect, "api/cpu-detect".to_string()),
-            (Endpoints::Memory, "api/memory".to_string()),
-            (Endpoints::NetworkDetect, "api/network-detect".to_string()),
-            (Endpoints::Volume, "api/volume".to_string()),
-            (Endpoints::All, "api/all".to_string()),
+            (Endpoints::Hostname, "/api/hostname".to_string()),
+            (Endpoints::Kernel, "/api/kernel".to_string()),
+            (Endpoints::Uptime, "/api/uptime".to_string()),
+            (Endpoints::Time, "/api/time".to_string()),
+            (Endpoints::CPU, "/api/cpu".to_string()),
+            (Endpoints::CpuDetect, "/api/cpu-detect".to_string()),
+            (Endpoints::Memory, "/api/memory".to_string()),
+            (Endpoints::NetworkDetect, "/api/network-detect".to_string()),
+            (Endpoints::Volume, "/api/volume".to_string()),
+            (Endpoints::All, "/api/all".to_string()),
         ])
     }
 
