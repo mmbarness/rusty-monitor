@@ -1,4 +1,4 @@
-use crate::{structs::Context, Error, compute::cpu::Compute};
+use crate::{structs::Context, Error, compute::cpu::Compute, bot_support::bot_support::BotSupport};
 use std::convert::From;
 
 #[poise::command(track_edits, slash_command)]
@@ -51,12 +51,7 @@ pub async fn cpu_load(
     command: Option<String>,
 ) -> Result<(), Error> {
 
-    match ctx.defer().await {
-        Ok(_) => {},
-        Err(_) => {
-            panic!("unable to defer discord resp")
-        }
-    }
+    BotSupport::defer(&ctx).await;
 
     let api_configs = &ctx.data().mprober_configs;
     let mprober_api = &ctx.data().mprober_api;
@@ -66,9 +61,7 @@ pub async fn cpu_load(
     let cpus_average = Compute::avg_load(&cpus.cpus_stat);
     let cpus_average_resp = format!("average load across cores: {}", Compute::percentage(&cpus_average));
   
-    let response = "```\n".to_owned()
-    + &cpus_average_resp.to_string() + ", "
-    + "```";
+    let response = "```\n".to_owned() + &cpus_average_resp.to_string() + "```";
     
     ctx.say(response).await?;
 

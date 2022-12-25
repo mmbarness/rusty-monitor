@@ -1,13 +1,15 @@
 #![feature(async_fn_in_trait)]
 #![warn(clippy::str_to_string)]
+mod bot_support;
 mod configs;
 mod commands;
-mod structs;
 mod compute;
 mod mprober_api;
 mod mprober_api_resources;
+mod structs;
 mod timer;
 mod thread_channel;
+use bot_support::bot_support::BotSupport;
 use mprober_api::api::MProberAPI;
 use configs::{bot_configs::BotConfig, mprober_configs::MProberConfigs};
 use structs::{BotData};
@@ -48,6 +50,7 @@ async fn _main() {
     let mprober_configs = MProberConfigs::load();
     let mprober_api = MProberAPI::load();
     let data = structs::BotData { 
+        bot_support: BotSupport{},
         bot_configs,
         mprober_configs,
         mprober_api,

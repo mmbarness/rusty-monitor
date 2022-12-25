@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
-use crate::{configs::{bot_configs::BotConfig,mprober_configs::MProberConfigs}, mprober_api::{api::MProberAPI}, mprober_api_resources::cpu::CPU};
+use crate::{configs::{bot_configs::BotConfig,mprober_configs::MProberConfigs}, mprober_api::{api::MProberAPI}, mprober_api_resources::cpu::CPU, bot_support::bot_support::BotSupport};
 
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
 pub struct BotData {
+    pub bot_support: BotSupport,
     pub mprober_configs: MProberConfigs,
     pub bot_configs: BotConfig,
     pub mprober_api: MProberAPI,
