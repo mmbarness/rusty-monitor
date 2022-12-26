@@ -40,7 +40,7 @@ impl Resource for CPULoad {}
 impl Resource for CPUs {}
 
 #[async_trait]
-impl Load for CPUs {
+impl Load for CPUs{
     async fn load(data: Response) -> CPUs {
         let mprober_response = match data.json::<MProberResponse<CPUs>>().await {
             Ok(cpu) => cpu,

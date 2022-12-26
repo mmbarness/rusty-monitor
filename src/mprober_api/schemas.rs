@@ -2,10 +2,6 @@ use serde::Deserialize;
 use strum_macros::EnumString;
 use crate::mprober_api_resources::{shared_traits::Resource};
 
-pub trait Print {
-    fn print(&self) -> String;
-}
-
 #[derive(Debug, Deserialize)]
 pub struct MProberResponse<D: Resource> {
     pub code: u64,

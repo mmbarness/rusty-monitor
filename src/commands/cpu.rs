@@ -13,7 +13,7 @@ pub async fn cpu_info(
     let mprober_api = &ctx.data().mprober_api;
 
     let cpus = mprober_api.requester.cpus(&api_configs).await;
-    // cpus.cpus.
+    // going to for now not handle multi-cpu systems
     let cpu_1 = match cpus.cpus.first() {
         Some(cpu) => cpu,
         None => {

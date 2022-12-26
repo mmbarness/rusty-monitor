@@ -26,3 +26,31 @@ pub trait Compute:Resource {
 }
 // implements Compute across all structs implementing Resource
 impl<T> Compute for T where T: Resource {}
+
+pub trait FormatResponse {
+    fn format_response<T>(data: T) -> String;
+}
+
+pub trait NumStringOrSize {
+    type Num;
+    type String;
+    type Size;
+}
+
+impl NumStringOrSize for u64 {
+    type Num = u64;
+    type String = ();
+    type Size = ();
+}
+
+impl NumStringOrSize for String {
+    type Num = ();
+    type String = String;
+    type Size = ();
+}
+
+impl NumStringOrSize for Size {
+    type Num = ();
+    type String = ();
+    type Size = Size;
+}
