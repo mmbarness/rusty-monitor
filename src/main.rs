@@ -70,6 +70,7 @@ async fn _main() {
                 commands::help::help(),
                 commands::cpu::cpu_info(),
                 commands::cpu::cpu_load(),
+                commands::memory::memory(),
                 commands::register::register(),
             ],
             prefix_options: poise::PrefixFrameworkOptions {

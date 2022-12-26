@@ -1,9 +1,10 @@
 use async_trait::async_trait;
 use serde::Deserialize;
 use reqwest::Response;
+use size::Size;
 use tokio::sync::oneshot;
 use crate::{mprober_api::schemas::MProberResponse, thread_channel::wrapper::{Wrap, Wrapper}};
-use super::shared_traits::{Resource, Load};
+use super::shared_traits::{Resource, Load, Compute};
 
 #[derive(Debug, Deserialize)]
 pub struct CPU {
@@ -27,17 +28,16 @@ pub struct CPUsDetect {
     pub load_average: LoadAverage,
     pub cpus_stat: CpusStat,
 }
+#[derive(Debug, Deserialize)]
+pub struct LoadAverage {
+    pub fifteen: f32,
+    pub five: f32,
+    pub one: f32,
+}
 
 impl Resource for CPUsDetect {}
 
 impl Resource for CPUs {}
-
-#[derive(Debug, Deserialize)]
-pub struct LoadAverage {
-    fifteen: f32,
-    five: f32,
-    one: f32,
-}
 
 #[async_trait]
 impl Load for CPUs {
