@@ -1,4 +1,4 @@
-use crate::{structs::Context, Error, bot_support::bot_support::BotSupport, mprober_api_resources::{memory::MemoryAndSwap, shared_traits::Compute}};
+use crate::{structs::Context, Error, bot_support::bot_support::BotSupport, mprober_api_resources::{memory::MemoryAndSwap, shared_traits::{Compute, FieldsToArray}}};
 use std::convert::From;
 
 #[poise::command(track_edits, slash_command, subcommands("all", "free", "cache", "swap", "in_the_red"))]
@@ -25,12 +25,14 @@ pub async fn all(
     let mprober_api = &ctx.data().mprober_api;
             
     let memory_and_swap = mprober_api.requester.memory(&api_configs).await;
-    let formatted_memory_and_swap = memory_and_swap.format_all_fields();
 
-    let available = &formatted_memory_and_swap.memory.available;
-    let available_resp = format!("availalbe memory: {available}");
-
-    let response = "```\n".to_owned() + &available_resp.to_string() + "```";
+    let formatted_fields = memory_and_swap.create_responses();
+    let fields_array = formatted_fields.fields_to_array();
+    
+    let initial = "```\n".to_owned();
+    let response= fields_array.into_iter().fold(initial, |acc, f| {
+        acc + &f.to_string() + " | "
+    }) + "```";
     
     ctx.say(response).await?;
 
@@ -50,18 +52,16 @@ pub async fn free(
     let mprober_api = &ctx.data().mprober_api;
             
     let memory_and_swap = mprober_api.requester.memory(&api_configs).await;
-    let formatted_mem_and_swap = memory_and_swap.format_all_fields();
-
-    let available_memory = &formatted_mem_and_swap.memory.available;
-    let available_memory_resp = format!("available memory: {available_memory}");
-
-    let available_swap = &memory_and_swap.swap.free;
-    let available_swap_resp = format!("available memory: {available_swap}");
-
-    let response = "```\n".to_owned()
-    + &available_memory_resp.to_string() 
-    + &available_swap_resp.to_string() 
-    + "```";
+    let formatted_mem_and_swap = memory_and_swap.create_responses();
+    
+    let response = 
+        "```\n".to_owned() + 
+        "Memory - " +
+        &formatted_mem_and_swap.memory.available + 
+        " | " +
+        "Swap - " +
+        &formatted_mem_and_swap.swap.free +
+        "```";
     
     ctx.say(response).await?;
 
@@ -72,7 +72,7 @@ pub async fn free(
 pub async fn cache(
     ctx: Context<'_>,
     #[description = "give me information about my memory"]
-    command: Option<String>,
+    _command: Option<String>,
 ) -> Result<(), Error> {
 
     BotSupport::defer(&ctx).await;
@@ -97,7 +97,7 @@ pub async fn cache(
 pub async fn swap(
     ctx: Context<'_>,
     #[description = "give me information about my memory"]
-    command: Option<String>,
+    _command: Option<String>,
 ) -> Result<(), Error> {
 
     BotSupport::defer(&ctx).await;
@@ -121,7 +121,7 @@ pub async fn swap(
 pub async fn in_the_red(
     ctx: Context<'_>,
     #[description = "give me information about my memory"]
-    command: Option<String>,
+    _command: Option<String>,
 ) -> Result<(), Error> {
 
     BotSupport::defer(&ctx).await;

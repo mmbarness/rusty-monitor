@@ -28,7 +28,20 @@ pub trait Compute:Resource {
 impl<T> Compute for T where T: Resource {}
 
 pub trait FormatResponse {
-    fn format_response<T>(data: T) -> String;
+    fn create_response_block(fields: Vec<String>) -> String {
+        let initial = "```\n".to_owned();
+        fields.into_iter().fold(initial, |acc, f| {
+            acc + &f.to_string()
+        }) + "```"
+    }
+}
+
+impl FormatResponse for Vec<String> {}
+
+impl<T> FormatResponse for T where T: Resource {}
+
+pub trait FieldsToArray {
+    fn fields_to_array(&self) -> Vec<String>;
 }
 
 pub trait NumStringOrSize {
