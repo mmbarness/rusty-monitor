@@ -1,18 +1,25 @@
-
+#![feature(async_fn_in_trait)]
 #![warn(clippy::str_to_string)]
+mod bot_support;
 mod configs;
 mod commands;
-mod structs;
 mod mprober_api;
+mod mprober_api_resources;
+mod structs;
 mod timer;
-use configs::configs::{bot_configs, mprober_configs};
-use poise::serenity_prelude as serenity;
-use std::{collections::HashMap, env::var, sync::Mutex, time::Duration};
+mod thread_channel;
+use bot_support::bot_support::BotSupport;
+use mprober_api::api::MProberAPI;
+use configs::{bot_configs::BotConfig, mprober_configs::MProberConfigs};
+use structs::{BotData};
+use std::time::Duration;
 use poise::serenity_prelude::GatewayIntents;
 type Error = Box<dyn std::error::Error + Send + Sync>;
-type Context<'a> = poise::Context<'a, Data, Error>;
 
-async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
+async fn on_error(error: poise::FrameworkError<'_, BotData, Error>) {
+    // This is our custom error handler
+    // They are many errors that can occur, so we only handle the ones we want to customize
+    // and forward the rest to the default handler
     match error {
         poise::FrameworkError::Setup { error, .. } => panic!("Failed to start bot: {:?}", error),
         poise::FrameworkError::Command { error, ctx } => {
@@ -37,30 +44,35 @@ fn main() -> Result<(), Error>{
 async fn _main() {
 
     tracing_subscriber::fmt::init();
-    let configs = configs::configs;
-    let bot_configs = bot_configs::BotConfig::load();
-    let mprober_configs = mprober_configs::MProberConfigs::load();
+    let bot_configs = BotConfig::load();
+    let token_copy = bot_configs.token.clone();
+    let mprober_configs = MProberConfigs::load();
+    let mprober_api = MProberAPI::load();
     let data = structs::BotData { 
+        bot_support: BotSupport{},
         bot_configs,
-        mprober_configs
+        mprober_configs,
+        mprober_api,
     };
     
     let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
 
     poise::Framework::builder()
-        .token(&bot_configs.token)
-        .user_data_setup(move |_ctx, _ready, _framework| {
+        .token(token_copy)
+        .setup(move |_ctx, _ready, _framework| {
             Box::pin(async move {
                 Ok(data)
             })
         })
         .options(poise::FrameworkOptions {
             commands: vec![
-                commands::commands::help(),
-                commands::commands::register(),
+                commands::help::help(),
+                commands::cpu::cpu_info(),
+                commands::cpu::cpu_load(),
+                commands::memory::memory(),
+                commands::register::register(),
             ],
             prefix_options: poise::PrefixFrameworkOptions {
-                prefix: Some("~~~~~".into()),
                 edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),
                 additional_prefixes: vec![
                     poise::Prefix::Literal("hey bot"),

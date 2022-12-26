@@ -1,10 +1,14 @@
 use core::panic;
-
-use dotenv::{ dotenv };
-use crate::mprober_schemas::Endpoints;
+use std::{collections::HashMap};
+use dotenv::{dotenv};
 use tokio::{time};
+use crate::{mprober_api::{schemas::Endpoints}};
+
 pub struct MProberConfigs {
     pub address: String,
+    pub build_address: fn(endpoint: &Endpoints) -> String,
+    pub endpoints: HashMap<Endpoints, String>,
+    pub api_key: String,
     pub port: u64,
     pub polling_frequency: time::Duration,
 }
@@ -14,14 +18,44 @@ impl MProberConfigs {
         Self::env_vars();
 
         let address = Self::address();
+        let api_key = Self::api_key();
         let port = Self::port();
         let polling_frequency = Self::polling_frequency();
 
         MProberConfigs { 
             address,
+            api_key,
+            build_address: Self::build_address,
+            endpoints: Self::endpoints(),
             port,
             polling_frequency,
         }
+    }
+
+    pub fn build_address(endpoint: &Endpoints) -> String {
+        let binding = Self::endpoints();
+        let endpoint_str = match binding.get(endpoint) {
+            Some(str) => str,
+            None => {
+                panic!("endpoint not in endpoints hashmap")
+            }
+        };
+        Self::address().clone() + &endpoint_str.clone()
+    }
+
+    fn endpoints() -> HashMap<Endpoints, String> {
+        HashMap::from([
+            (Endpoints::Hostname, "/api/hostname".to_string()),
+            (Endpoints::Kernel, "/api/kernel".to_string()),
+            (Endpoints::Uptime, "/api/uptime".to_string()),
+            (Endpoints::Time, "/api/time".to_string()),
+            (Endpoints::CPU, "/api/cpu".to_string()),
+            (Endpoints::CpuDetect, "/api/cpu-detect".to_string()),
+            (Endpoints::Memory, "/api/memory".to_string()),
+            (Endpoints::NetworkDetect, "/api/network-detect".to_string()),
+            (Endpoints::Volume, "/api/volume".to_string()),
+            (Endpoints::All, "/api/all".to_string()),
+        ])
     }
 
     fn env_vars() {
@@ -40,6 +74,15 @@ impl MProberConfigs {
             Ok(address) => address,
             Err(_) => {
                 panic!("Error accessing server address in .env")
+            }
+        }
+    }
+
+    fn api_key() -> String {    
+        match std::env::var("API_KEY") {
+            Ok(api_key) => api_key,
+            Err(_) => {
+                panic!("Error accessing api key in .env")
             }
         }
     }
@@ -71,20 +114,5 @@ impl MProberConfigs {
                 panic!("Error accessing server address in .env")
             }
         }
-    }
-}
-
-pub fn endpoint(endpoint: Endpoints) -> &'static str {
-    match endpoint {
-        Endpoints::Hostname => "api/hostname",
-        Endpoints::Kernel => "api/kernel",
-        Endpoints::Uptime => "api/uptime",
-        Endpoints::Time => "api/time",
-        Endpoints::CPU => "api/cpu",
-        Endpoints::CpuDetect => "api/cpu-detect",
-        Endpoints::Memory => "api/memory",
-        Endpoints::NetworkDetect => "api/network-detect",
-        Endpoints::Volume => "api/volume",
-        Endpoints::All => "api/all",
     }
 }

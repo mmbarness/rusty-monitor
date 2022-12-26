@@ -1,2 +1,4 @@
-/target
 .env
+rusty-monitor.code-workspace
+/target
+.vscode
