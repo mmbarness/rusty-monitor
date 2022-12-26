@@ -23,7 +23,7 @@ pub struct CPUs {
 pub type CpusStat = Vec<f64>;
 
 #[derive(Debug, Deserialize)]
-pub struct CPUsDetect {
+pub struct CPULoad {
     pub cpus: Vec<CPU>,
     pub load_average: LoadAverage,
     pub cpus_stat: CpusStat,
@@ -35,7 +35,7 @@ pub struct LoadAverage {
     pub one: f32,
 }
 
-impl Resource for CPUsDetect {}
+impl Resource for CPULoad {}
 
 impl Resource for CPUs {}
 
@@ -62,9 +62,9 @@ impl Wrap for CPUs {
 }
 
 #[async_trait]
-impl Load for CPUsDetect {
-    async fn load(data: Response) -> CPUsDetect {
-        let mprober_response = match data.json::<MProberResponse<CPUsDetect>>().await {
+impl Load for CPULoad {
+    async fn load(data: Response) -> CPULoad {
+        let mprober_response = match data.json::<MProberResponse<CPULoad>>().await {
             Ok(cpu) => cpu,
             Err(e) => {
                 panic!("error parsing cpu data: #{}", e);
@@ -76,7 +76,7 @@ impl Load for CPUsDetect {
     }
 }
 
-impl Wrap for CPUsDetect {
+impl Wrap for CPULoad {
     fn wrap<'a, CPUsDetect>() -> Wrapper<CPUsDetect> {
         let (tx, rx) = oneshot::channel::<CPUsDetect>();
         return Wrapper { tx, rx, }

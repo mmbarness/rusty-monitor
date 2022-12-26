@@ -1,4 +1,4 @@
-use crate::{structs::Context, Error, bot_support::bot_support::BotSupport, mprober_api_resources::{cpu::CPUsDetect, shared_traits::Compute}};
+use crate::{structs::Context, Error, bot_support::bot_support::BotSupport, mprober_api_resources::{cpu::CPULoad, shared_traits::Compute}};
 use std::convert::From;
 
 #[poise::command(track_edits, slash_command)]
@@ -59,8 +59,8 @@ pub async fn cpu_load(
             
     let cpus = mprober_api.requester.cpu_load(&api_configs).await;
     let cpus_stat = &cpus.cpus_stat;
-    let cpus_average = CPUsDetect::avg(cpus_stat);
-    let cpus_average_resp = format!("average load across cores: {}", CPUsDetect::percentage(&cpus_average));
+    let cpus_average = CPULoad::avg(cpus_stat);
+    let cpus_average_resp = format!("average load across cores: {}", CPULoad::percentage(&cpus_average));
   
     let response = "```\n".to_owned() + &cpus_average_resp.to_string() + "```";
     

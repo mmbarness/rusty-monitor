@@ -3,7 +3,6 @@
 mod bot_support;
 mod configs;
 mod commands;
-mod compute;
 mod mprober_api;
 mod mprober_api_resources;
 mod structs;
