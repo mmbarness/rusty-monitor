@@ -1,4 +1,4 @@
-use crate::{structs::Context, Error, bot_support::bot_support::BotSupport, mprober_api_resources::{memory::MemoryAndSwap, shared_traits::{Compute, FieldsToArray}}};
+use crate::{structs::Context, Error, bot_support::bot_support::BotSupport, mprober_api_resources::{memory::{MemoryAndSwap, Memory, Threshold, Swap}, shared_traits::{Compute, FieldsToArray}}};
 use std::convert::From;
 
 #[poise::command(track_edits, slash_command, subcommands("all", "free", "cache", "swap", "in_the_red"))]
@@ -13,9 +13,8 @@ pub async fn memory(
 }
 
 #[poise::command(track_edits, slash_command)]
-pub async fn all(
+async fn all(
     ctx: Context<'_>,
-    #[description = "give me all available information about my memory"]
     _command: Option<String>,
 ) -> Result<(), Error> {
 
@@ -26,7 +25,7 @@ pub async fn all(
             
     let memory_and_swap = mprober_api.requester.memory(&api_configs).await;
 
-    let formatted_fields = memory_and_swap.create_responses();
+    let formatted_fields = memory_and_swap.responses();
     let fields_array = formatted_fields.fields_to_array();
     
     let initial = "```\n".to_owned();
@@ -40,9 +39,8 @@ pub async fn all(
 }
 
 #[poise::command(track_edits, slash_command)]
-pub async fn free(
+async fn free(
     ctx: Context<'_>,
-    #[description = "give me information about my memory"]
     _command: Option<String>,
 ) -> Result<(), Error> {
 
@@ -52,7 +50,7 @@ pub async fn free(
     let mprober_api = &ctx.data().mprober_api;
             
     let memory_and_swap = mprober_api.requester.memory(&api_configs).await;
-    let formatted_mem_and_swap = memory_and_swap.create_responses();
+    let formatted_mem_and_swap = memory_and_swap.responses();
     
     let response = 
         "```\n".to_owned() + 
@@ -69,9 +67,8 @@ pub async fn free(
 }
 
 #[poise::command(track_edits, slash_command)]
-pub async fn cache(
+async fn cache(
     ctx: Context<'_>,
-    #[description = "give me information about my memory"]
     _command: Option<String>,
 ) -> Result<(), Error> {
 
@@ -83,10 +80,14 @@ pub async fn cache(
     let memory_and_swap = mprober_api.requester.memory(&api_configs).await;
     let formatted_mem_and_swap = memory_and_swap.format_all_fields();
 
-    let available = &formatted_mem_and_swap.memory.available;
-    let available_resp = format!("available memory: {available}");
-
-    let response = "```\n".to_owned() + &available_resp.to_string() + "```";
+    let response = 
+        "```\n".to_owned() +
+        "Cache use in memory - " +
+        &formatted_mem_and_swap.memory.cache + 
+        " | " +
+        "Cache use in swap - " +
+        &formatted_mem_and_swap.swap.cache +
+        "```";
     
     ctx.say(response).await?;
 
@@ -94,9 +95,8 @@ pub async fn cache(
 }
 
 #[poise::command(track_edits, slash_command)]
-pub async fn swap(
+async fn swap(
     ctx: Context<'_>,
-    #[description = "give me information about my memory"]
     _command: Option<String>,
 ) -> Result<(), Error> {
 
@@ -106,11 +106,13 @@ pub async fn swap(
     let mprober_api = &ctx.data().mprober_api;
             
     let memory_and_swap = mprober_api.requester.memory(&api_configs).await;
-
-    let available = MemoryAndSwap::size(&memory_and_swap.memory.available);
-    let available_resp = format!("availalbe memory: {available}");
-
-    let response = "```\n".to_owned() + &available_resp.to_string() + "```";
+    let formatted_fields = memory_and_swap.swap.responses();
+    let fields_array = formatted_fields.fields_to_array();
+    
+    let initial = "```\n".to_owned();
+    let response= fields_array.into_iter().fold(initial, |acc, f| {
+        acc + &f.to_string() + " | "
+    }) + "```";
     
     ctx.say(response).await?;
 
@@ -118,11 +120,19 @@ pub async fn swap(
 }
 
 #[poise::command(track_edits, slash_command)]
-pub async fn in_the_red(
+async fn in_the_red(
     ctx: Context<'_>,
-    #[description = "give me information about my memory"]
+    #[description = "Threshold - defaults to 10% (of total)"] t: Option<u8>,
     _command: Option<String>,
 ) -> Result<(), Error> {
+    
+    let threshold = match t {
+        Some(num) => {
+            let as_f32 = f32::from(num);
+            f32::from(as_f32 / 100.0)
+        },
+        None => 0.1,
+    };
 
     BotSupport::defer(&ctx).await;
 
@@ -130,11 +140,39 @@ pub async fn in_the_red(
     let mprober_api = &ctx.data().mprober_api;
             
     let memory_and_swap = mprober_api.requester.memory(&api_configs).await;
+    
+    let memory = &memory_and_swap.memory;
+    let memory_ratio =  Memory::ratio(&memory.used, &memory.total);
 
-    let available = MemoryAndSwap::size(&memory_and_swap.memory.available);
-    let available_resp = format!("availalbe memory: {available}");
+    let swap = &memory_and_swap.swap;
+    let swap_ratio = Swap::ratio(&swap.used, &swap.total);
 
-    let response = "```\n".to_owned() + &available_resp.to_string() + "```";
+    let response = match [(memory_ratio > threshold), (swap_ratio > threshold)] {
+        [true, true] => {
+            format!(
+                "Both! Memory is at {}% and Swap is {}%",
+                (memory_ratio * 100.0).round(),
+                (swap_ratio * 100.0).round()
+            )
+        },
+        [true, false] => {
+            format!(
+                "Swap is okay ({}%), but memory is at {}%",
+                (swap_ratio * 100.0).round(),
+                (memory_ratio * 100.0).round(),
+            )
+        }, 
+        [false, true] => {
+            format!(
+                "Mmory is ok ({}%), but swap is at {}%",
+                (memory_ratio * 100.0).round(),
+                (swap_ratio * 100.0).round(),
+            )
+        },
+        [false, false] => {
+            false.to_string()
+        }
+    };
     
     ctx.say(response).await?;
 
