@@ -4,9 +4,7 @@ use std::convert::From;
 #[poise::command(track_edits, slash_command)]
 pub async fn cpu_info(
     ctx: Context<'_>,
-    #[description = "give me basic info about my cpu"]
-    #[autocomplete = "poise::builtins::autocomplete_command"]
-    command: Option<String>,
+    _command: Option<String>,
 ) -> Result<(), Error> {
 
     let api_configs = &ctx.data().mprober_configs;
@@ -48,8 +46,7 @@ pub async fn cpu_info(
 #[poise::command(track_edits, slash_command)]
 pub async fn cpu_load(
     ctx: Context<'_>,
-    #[description = "whats happening with my cpu right now"]
-    command: Option<String>,
+    _command: Option<String>,
 ) -> Result<(), Error> {
 
     BotSupport::defer(&ctx).await;

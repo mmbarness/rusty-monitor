@@ -1,10 +1,22 @@
-use crate::{structs::Context, Error, bot_support::bot_support::BotSupport, mprober_api_resources::{memory::{MemoryAndSwap, Memory, Threshold, Swap}, shared_traits::{Compute, FieldsToArray}}};
+use crate::bot_support::bot_support::BotSupport;
+use crate::Error;
+use crate::mprober_api_resources;
+use mprober_api_resources::{
+    memory::{
+        Memory,
+        Threshold,
+        Swap
+    }, 
+    shared_traits::{
+        FieldsToArray
+    }
+};
 use std::convert::From;
+use crate::structs::Context;
 
 #[poise::command(track_edits, slash_command, subcommands("all", "free", "cache", "swap", "in_the_red"))]
 pub async fn memory(
     _ctx: Context<'_>,
-    #[description = "give me information about my memory"]
     _command: Option<String>,
 ) -> Result<(), Error> {
     // Running this function directly, without any subcommand, doesn't do anything

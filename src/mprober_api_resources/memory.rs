@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use serde::Deserialize;
 use reqwest::Response;
 use size::Size;
-use crate::{mprober_api::schemas::MProberResponse, commands::memory};
+use crate::{mprober_api::schemas::MProberResponse};
 use super::shared_traits::{Resource, Load, NumStringOrSize, FieldsToArray};
 #[derive(Debug, Deserialize)]
 pub struct Memory<T:NumStringOrSize> {
