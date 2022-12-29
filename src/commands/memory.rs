@@ -134,16 +134,19 @@ async fn swap(
 #[poise::command(track_edits, slash_command)]
 async fn in_the_red(
     ctx: Context<'_>,
-    #[description = "Threshold - defaults to 10% (of total)"] t: Option<u8>,
+    #[description = "Threshold - defaults to 10% (of total). Enter as a number, e.g. 10"] threshold: Option<u8>,
     _command: Option<String>,
 ) -> Result<(), Error> {
-    
-    let threshold = match t {
+
+    let (validated_threshold, default_used) = match threshold {
         Some(num) => {
             let as_f32 = f32::from(num);
-            f32::from(as_f32 / 100.0)
+            let divided = f32::from(as_f32 / 100.0);
+            println!("_threshold: {}", num);
+            println!("dived: {}", divided);
+            (divided, false)
         },
-        None => 0.1,
+        None => (0.5, true),
     };
 
     BotSupport::defer(&ctx).await;
@@ -159,30 +162,70 @@ async fn in_the_red(
     let swap = &memory_and_swap.swap;
     let swap_ratio = Swap::ratio(&swap.used, &swap.total);
 
-    let response = match [(memory_ratio > threshold), (swap_ratio > threshold)] {
+    let response = match [(memory_ratio > validated_threshold), (swap_ratio > validated_threshold)] {
         [true, true] => {
-            format!(
-                "Both! Memory is at {}% and Swap is {}%",
-                (memory_ratio * 100.0).round(),
-                (swap_ratio * 100.0).round()
-            )
+            match default_used {
+                true => {
+                    format!(
+                        "No threshold passed. Used default of 50%, which both memory and swap exceed. Memory is at {}% and Swap is {}%",
+                        (memory_ratio * 100.0).round(),
+                        (swap_ratio * 100.0).round()
+                    )
+                }, 
+                false => {
+                    format!(
+                        "Both! Memory is at {}% and Swap is {}%",
+                        (memory_ratio * 100.0).round(),
+                        (swap_ratio * 100.0).round()
+                    )
+                }
+            }
         },
         [true, false] => {
-            format!(
-                "Swap is okay ({}%), but memory is at {}%",
-                (swap_ratio * 100.0).round(),
-                (memory_ratio * 100.0).round(),
-            )
+            match default_used {
+                true => {
+                    format!(
+                        "No threshold passed, used default of 50%. Swap is okay ({}%), but memory is at {}%",
+                        (swap_ratio * 100.0).round(),
+                        (memory_ratio * 100.0).round(),
+                    )
+                }, 
+                false => {
+                    format!(
+                        "Swap is okay ({}%), but memory is at {}%",
+                        (swap_ratio * 100.0).round(),
+                        (memory_ratio * 100.0).round(),
+                    )
+                }
+            }
         }, 
         [false, true] => {
-            format!(
-                "Mmory is ok ({}%), but swap is at {}%",
-                (memory_ratio * 100.0).round(),
-                (swap_ratio * 100.0).round(),
-            )
+            match default_used {
+                true => {
+                    format!(
+                        "No threshold passed, used default of 50%. Memory is ok ({}%), but swap is at {}%",
+                        (memory_ratio * 100.0).round(),
+                        (swap_ratio * 100.0).round(),
+                    )
+                }, 
+                false => {
+                    format!(
+                        "Memory is ok ({}%), but swap is at {}%",
+                        (memory_ratio * 100.0).round(),
+                        (swap_ratio * 100.0).round(),
+                    )
+                }
+            }
         },
         [false, false] => {
-            "Nope, all good!".to_string()
+            match default_used {
+                true => {
+                    format!("Neither swap nor memory exceeds default threshold of {}%", (validated_threshold * 100.0).round())
+                }
+                false => {
+                    format!("Neither swap nor memory exceeds {}%", (validated_threshold * 100.0).round())
+                }
+            }
         }
     };
     
