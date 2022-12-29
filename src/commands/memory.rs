@@ -182,7 +182,7 @@ async fn in_the_red(
             )
         },
         [false, false] => {
-            false.to_string()
+            "Nope, all good!"
         }
     };
     
