@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use serde::Deserialize;
 use reqwest::Response;
 use size::Size;
-use crate::{mprober_api::schemas::MProberResponse};
+use crate::{mprober_api::schemas::MProberResponse, commands::memory};
 use super::shared_traits::{Resource, Load, NumStringOrSize, FieldsToArray};
 #[derive(Debug, Deserialize)]
 pub struct Memory<T:NumStringOrSize> {
@@ -46,7 +46,36 @@ impl Load for MemoryAndSwap<u64> {
     }
 }
 
+pub trait Threshold {
+    fn ratio(part: &u64, whole: &u64) -> f32 {
+        (part.clone()) as f32 / (whole.clone() as f32)
+    }
+}
+
+impl Threshold for Memory<u64>{
+    fn ratio(part: &u64, whole: &u64) -> f32 {
+        (part.clone()) as f32 / (whole.clone() as f32)
+    }
+}
+impl Threshold for Swap<u64> {
+    fn ratio(part: &u64, whole: &u64) -> f32 {
+        (part.clone()) as f32 / (whole.clone() as f32)
+    }
+}
+
 impl Memory<u64> {
+    pub fn responses(&self) -> Memory<String> {
+        let formatted_memory = &self.format_all_fields();
+        Memory {
+            available: format!("Available Memory: {}", formatted_memory.available),
+            buffers: format!("Buffers: {}", formatted_memory.buffers),
+            cache: format!("Cache: {}", formatted_memory.cache),
+            free: format!("Free: {}", formatted_memory.free),
+            shared: format!("Shared: {}", formatted_memory.shared),
+            total: format!("Total: {}", formatted_memory.total),
+            used: format!("Used: {}", formatted_memory.used),
+        }
+    }
     pub fn format_all_fields(&self) -> Memory<String> {
         let formatted_memory = Memory { 
             available: Size::from_bytes(self.available.clone()),
@@ -103,6 +132,15 @@ impl FieldsToArray for MemoryAndSwap<String> {
 }
 
 impl Swap<u64> {
+    pub fn responses(&self) -> Swap<String> {
+        let formatted_swap = &self.format_all_fields();
+        Swap {
+            cache: format!("Cache: {}", formatted_swap.cache),
+            free: format!("Free: {}", formatted_swap.free),
+            total: format!("Total: {}", formatted_swap.total),
+            used: format!("Used: {}", formatted_swap.used),
+        }
+    }
     pub fn format_all_fields(&self) -> Swap<String> {
         let formatted_swap = Swap { 
             cache: Size::from_bytes(self.cache.clone()),
@@ -128,25 +166,10 @@ impl MemoryAndSwap<u64> {
         }
     }
 
-    pub fn create_responses(&self) -> MemoryAndSwap<String> {
-        let formatted_memory = self.memory.format_all_fields();
-        let formatted_swap = self.swap.format_all_fields();
-        let memory_response = Memory {
-            available: format!("Available Memory: {}", formatted_memory.available),
-            buffers: format!("Buffers: {}", formatted_memory.buffers),
-            cache: format!("Cache: {}", formatted_memory.cache),
-            free: format!("Free: {}", formatted_memory.free),
-            shared: format!("Shared: {}", formatted_memory.shared),
-            total: format!("Total: {}", formatted_memory.total),
-            used: format!("Used: {}", formatted_memory.used),
-        };
-        let swap_response = Swap {
-            cache: format!("Cache: {}", formatted_swap.cache),
-            free: format!("Free: {}", formatted_swap.free),
-            total: format!("Total: {}", formatted_swap.total),
-            used: format!("Used: {}", formatted_swap.used),
-        };
-
-        MemoryAndSwap { memory: memory_response, swap: swap_response }
+    pub fn responses(&self) -> MemoryAndSwap<String> {
+        MemoryAndSwap {
+            memory: self.memory.responses(),
+            swap: self.swap.responses()
+        }
     }
 }
