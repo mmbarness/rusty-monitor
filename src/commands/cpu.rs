@@ -7,10 +7,9 @@ pub async fn cpu_info(
     _command: Option<String>,
 ) -> Result<(), Error> {
 
-    let api_configs = &ctx.data().mprober_configs;
     let mprober_api = &ctx.data().mprober_api;
 
-    let cpus = mprober_api.requester.cpus(&api_configs).await;
+    let cpus = mprober_api.requester.cpus(&mprober_api.configs).await;
     // going to for now not handle multi-cpu systems
     let cpu_1 = match cpus.cpus.first() {
         Some(cpu) => cpu,
@@ -51,10 +50,9 @@ pub async fn cpu_load(
 
     BotSupport::defer(&ctx).await;
 
-    let api_configs = &ctx.data().mprober_configs;
     let mprober_api = &ctx.data().mprober_api;
             
-    let cpus = mprober_api.requester.cpu_load(&api_configs).await;
+    let cpus = mprober_api.requester.cpu_load(&mprober_api.configs).await;
     let cpus_stat = &cpus.cpus_stat;
     let cpus_average = CPULoad::avg(cpus_stat);
     let cpus_average_resp = format!("average load across cores: {}", CPULoad::percentage(&cpus_average));

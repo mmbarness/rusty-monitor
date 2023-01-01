@@ -4,7 +4,7 @@ use reqwest::Response;
 use size::Size;
 use crate::{mprober_api::schemas::MProberResponse};
 use super::shared_traits::{Resource, Load, NumStringOrSize, FieldsToArray};
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Memory<T:NumStringOrSize> {
     pub available: T,
     pub buffers: T,
@@ -15,7 +15,7 @@ pub struct Memory<T:NumStringOrSize> {
     pub used: T
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Swap<T:NumStringOrSize> {
     pub cache: T,
     pub free: T,
@@ -23,7 +23,7 @@ pub struct Swap<T:NumStringOrSize> {
     pub used: T,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct MemoryAndSwap<T:NumStringOrSize> {
     pub memory: Memory<T>,
     pub swap: Swap<T>,

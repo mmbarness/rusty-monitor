@@ -32,10 +32,9 @@ async fn all(
 
     BotSupport::defer(&ctx).await;
 
-    let api_configs = &ctx.data().mprober_configs;
     let mprober_api = &ctx.data().mprober_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&api_configs).await;
+    let memory_and_swap = mprober_api.requester.memory(&mprober_api.configs).await;
 
     let formatted_fields = memory_and_swap.responses();
     let fields_array = formatted_fields.fields_to_array();
@@ -58,10 +57,9 @@ async fn free(
 
     BotSupport::defer(&ctx).await;
 
-    let api_configs = &ctx.data().mprober_configs;
     let mprober_api = &ctx.data().mprober_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&api_configs).await;
+    let memory_and_swap = mprober_api.requester.memory(&mprober_api.configs).await;
     let formatted_mem_and_swap = memory_and_swap.responses();
     
     let response = 
@@ -86,10 +84,9 @@ async fn cache(
 
     BotSupport::defer(&ctx).await;
 
-    let api_configs = &ctx.data().mprober_configs;
     let mprober_api = &ctx.data().mprober_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&api_configs).await;
+    let memory_and_swap = mprober_api.requester.memory(&mprober_api.configs).await;
     let formatted_mem_and_swap = memory_and_swap.format_all_fields();
 
     let response = 
@@ -114,10 +111,9 @@ async fn swap(
 
     BotSupport::defer(&ctx).await;
 
-    let api_configs = &ctx.data().mprober_configs;
     let mprober_api = &ctx.data().mprober_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&api_configs).await;
+    let memory_and_swap = mprober_api.requester.memory(&mprober_api.configs).await;
     let formatted_fields = memory_and_swap.swap.responses();
     let fields_array = formatted_fields.fields_to_array();
     
@@ -151,10 +147,9 @@ async fn in_the_red(
 
     BotSupport::defer(&ctx).await;
 
-    let api_configs = &ctx.data().mprober_configs;
     let mprober_api = &ctx.data().mprober_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&api_configs).await;
+    let memory_and_swap = mprober_api.requester.memory(&mprober_api.configs).await;
     
     let memory = &memory_and_swap.memory;
     let memory_ratio =  Memory::ratio(&memory.used, &memory.total);
