@@ -93,7 +93,7 @@ async fn _main() {
                 })
             },
             /// Every command invocation must pass this check to continue execution
-            command_check: Some(|ctx| {
+            command_check: Some(|_ctx| {
                 Box::pin(async move {
                     return Ok(true);
                 })

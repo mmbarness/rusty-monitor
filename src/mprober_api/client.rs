@@ -8,7 +8,7 @@ impl Client {
     pub fn new(&self) -> reqwest::Client {
         let api_key_header_val = match header::HeaderValue::from_str(self.api_key.as_str()) {
             Ok(v) => v,
-            Err(e) => {
+            Err(_e) => {
                 panic!("error parsing api key while initiating Client struct")
             }
         };

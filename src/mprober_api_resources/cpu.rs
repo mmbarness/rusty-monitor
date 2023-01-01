@@ -1,10 +1,9 @@
 use async_trait::async_trait;
 use serde::Deserialize;
 use reqwest::Response;
-use size::Size;
 use tokio::sync::oneshot;
 use crate::{mprober_api::schemas::MProberResponse, thread_channel::wrapper::{Wrap, Wrapper}};
-use super::shared_traits::{Resource, Load, Compute};
+use super::shared_traits::{Resource, Load};
 
 #[derive(Debug, Deserialize)]
 pub struct CPU {
