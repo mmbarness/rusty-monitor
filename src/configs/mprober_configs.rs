@@ -3,11 +3,9 @@ use std::{collections::HashMap};
 use dotenv::{dotenv};
 use tokio::{time};
 use crate::{mprober_api::{schemas::Endpoints}};
-
+#[derive(Debug, Clone)]
 pub struct MProberConfigs {
     pub address: String,
-    pub build_address: fn(endpoint: &Endpoints) -> String,
-    pub endpoints: HashMap<Endpoints, String>,
     pub api_key: String,
     pub port: u64,
     pub polling_frequency: time::Duration,
@@ -25,16 +23,14 @@ impl MProberConfigs {
         MProberConfigs { 
             address,
             api_key,
-            build_address: Self::build_address,
-            endpoints: Self::endpoints(),
             port,
             polling_frequency,
         }
     }
 
-    pub fn build_address(endpoint: &Endpoints) -> String {
+    pub fn build_address(endpoint: Endpoints) -> String {
         let binding = Self::endpoints();
-        let endpoint_str = match binding.get(endpoint) {
+        let endpoint_str = match binding.get(&endpoint) {
             Some(str) => str,
             None => {
                 panic!("endpoint not in endpoints hashmap")

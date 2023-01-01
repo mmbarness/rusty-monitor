@@ -1,5 +1,5 @@
 use reqwest::header;
-
+#[derive(Debug, Clone)]
 pub struct Client {
     pub api_key: String 
 }

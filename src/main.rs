@@ -12,6 +12,7 @@ use bot_support::bot_support::BotSupport;
 use mprober_api::api::MProberAPI;
 use configs::{bot_configs::BotConfig, mprober_configs::MProberConfigs};
 use structs::{BotData};
+use tokio::time;
 use std::time::Duration;
 use poise::serenity_prelude::GatewayIntents;
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -42,16 +43,14 @@ fn main() -> Result<(), Error>{
 }
 
 async fn _main() {
-
+    
     tracing_subscriber::fmt::init();
     let bot_configs = BotConfig::load();
     let token_copy = bot_configs.token.clone();
-    let mprober_configs = MProberConfigs::load();
     let mprober_api = MProberAPI::load();
     let data = structs::BotData { 
         bot_support: BotSupport{},
         bot_configs,
-        mprober_configs,
         mprober_api,
     };
     
@@ -60,6 +59,14 @@ async fn _main() {
     poise::Framework::builder()
         .token(token_copy)
         .setup(move |_ctx, _ready, _framework| {
+            let ctx = _ctx.clone();
+            tokio::spawn(async move {
+                let mut interval = time::interval(time::Duration::from_secs(10));
+                let whatever = ctx.data;
+                loop {
+                  interval.tick().await;
+                }
+            });
             Box::pin(async move {
                 Ok(data)
             })
@@ -70,7 +77,9 @@ async fn _main() {
                 commands::cpu::cpu_info(),
                 commands::cpu::cpu_load(),
                 commands::memory::memory(),
+                commands::monitor::start_monitor(),
                 commands::register::register(),
+                commands::whatever::who_cares(),
             ],
             prefix_options: poise::PrefixFrameworkOptions {
                 edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),

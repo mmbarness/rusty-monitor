@@ -1,6 +1,6 @@
 use dotenv::{ dotenv };
 use gnomeutils::serenity::{GuildId};
-
+#[derive(Debug, Clone)]
 pub struct BotConfig {
     pub token: String,
     pub environment: String,

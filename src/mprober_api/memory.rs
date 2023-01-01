@@ -8,7 +8,7 @@ use super::schemas::Endpoints;
 impl Request {
     pub async fn memory(&self, configs: &MProberConfigs) -> MemoryAndSwap<u64> {
         let client = self.client.new();
-        let address = (configs.build_address)(&Endpoints::Memory);
+        let address = MProberConfigs::build_address(Endpoints::Memory);
         let resp:Response = match client.get(address)
             .send()
             .await {

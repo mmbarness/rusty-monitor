@@ -5,7 +5,7 @@ use tokio::sync::oneshot;
 use crate::{mprober_api::schemas::MProberResponse, thread_channel::wrapper::{Wrap, Wrapper}};
 use super::shared_traits::{Resource, Load};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct CPU {
     pub cores: u8,
     pub mhz: Vec<f64>,
@@ -13,7 +13,7 @@ pub struct CPU {
     pub threads: u8
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct CPUs {
     pub cpus: Vec<CPU>,
     pub load_average: LoadAverage,
@@ -21,13 +21,13 @@ pub struct CPUs {
 
 pub type CpusStat = Vec<f64>;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct CPULoad {
     pub cpus: Vec<CPU>,
     pub load_average: LoadAverage,
     pub cpus_stat: CpusStat,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct LoadAverage {
     pub fifteen: f32,
     pub five: f32,

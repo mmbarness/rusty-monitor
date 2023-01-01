@@ -1,7 +1,7 @@
 use crate::{configs::mprober_configs::MProberConfigs};
 
 use super::{requester::Request, client::Client};
-
+#[derive(Debug, Clone)]
 pub struct MProberAPI {
     pub configs: MProberConfigs,
     pub requester: Request,
