@@ -6,7 +6,7 @@ use super::requester::{Request};
 use super::schemas::Endpoints;
 
 impl Request {
-    pub async fn cpus(&self, configs: &MProberConfigs) -> CPUs {
+    pub async fn cpus(&self) -> CPUs {
         let client = self.client.new();
         let address = MProberConfigs::build_address(Endpoints::CPU);
         let resp:Response = match client.get(address)
@@ -27,7 +27,7 @@ impl Request {
         return cpu;
     }
 
-    pub async fn cpu_load(&self, configs: &MProberConfigs) -> CPULoad{
+    pub async fn cpu_load(&self) -> CPULoad{
         let client = self.client.new();
         let address = MProberConfigs::build_address(Endpoints::CpuDetect);
         let resp:Response = match client.get(address)

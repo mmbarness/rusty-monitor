@@ -19,7 +19,7 @@ impl Client {
             .default_headers(headers)
             .build() {
                 Ok(c) => c,
-                Err(e) => {
+                Err(_) => {
                     panic!("error building reqwest client");
                 }
             }

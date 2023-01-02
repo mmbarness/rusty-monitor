@@ -9,7 +9,7 @@ pub async fn cpu_info(
 
     let mprober_api = &ctx.data().mprober_api;
 
-    let cpus = mprober_api.requester.cpus(&mprober_api.configs).await;
+    let cpus = mprober_api.requester.cpus().await;
     // going to for now not handle multi-cpu systems
     let cpu_1 = match cpus.cpus.first() {
         Some(cpu) => cpu,
@@ -52,7 +52,7 @@ pub async fn cpu_load(
 
     let mprober_api = &ctx.data().mprober_api;
             
-    let cpus = mprober_api.requester.cpu_load(&mprober_api.configs).await;
+    let cpus = mprober_api.requester.cpu_load().await;
     let cpus_stat = &cpus.cpus_stat;
     let cpus_average = CPULoad::avg(cpus_stat);
     let cpus_average_resp = format!("average load across cores: {}", CPULoad::percentage(&cpus_average));

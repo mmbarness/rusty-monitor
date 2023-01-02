@@ -34,7 +34,7 @@ async fn all(
 
     let mprober_api = &ctx.data().mprober_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&mprober_api.configs).await;
+    let memory_and_swap = mprober_api.requester.memory().await;
 
     let formatted_fields = memory_and_swap.responses();
     let fields_array = formatted_fields.fields_to_array();
@@ -59,7 +59,7 @@ async fn free(
 
     let mprober_api = &ctx.data().mprober_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&mprober_api.configs).await;
+    let memory_and_swap = mprober_api.requester.memory().await;
     let formatted_mem_and_swap = memory_and_swap.responses();
     
     let response = 
@@ -86,7 +86,7 @@ async fn cache(
 
     let mprober_api = &ctx.data().mprober_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&mprober_api.configs).await;
+    let memory_and_swap = mprober_api.requester.memory().await;
     let formatted_mem_and_swap = memory_and_swap.format_all_fields();
 
     let response = 
@@ -113,7 +113,7 @@ async fn swap(
 
     let mprober_api = &ctx.data().mprober_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&mprober_api.configs).await;
+    let memory_and_swap = mprober_api.requester.memory().await;
     let formatted_fields = memory_and_swap.swap.responses();
     let fields_array = formatted_fields.fields_to_array();
     
@@ -149,7 +149,7 @@ async fn in_the_red(
 
     let mprober_api = &ctx.data().mprober_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&mprober_api.configs).await;
+    let memory_and_swap = mprober_api.requester.memory().await;
     
     let memory = &memory_and_swap.memory;
     let memory_ratio =  Memory::ratio(&memory.used, &memory.total);

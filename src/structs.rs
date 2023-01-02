@@ -1,6 +1,4 @@
-use std::collections::HashMap;
-
-use crate::{configs::{bot_configs::BotConfig,mprober_configs::MProberConfigs}, mprober_api::{api::MProberAPI}, mprober_api_resources::cpu::CPU, bot_support::bot_support::BotSupport};
+use crate::{configs::{bot_configs::BotConfig}, mprober_api::{api::MProberAPI}, bot_support::bot_support::BotSupport};
 
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
 #[derive(Debug, Clone)]
