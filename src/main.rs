@@ -3,6 +3,7 @@
 mod bot_support;
 mod configs;
 mod commands;
+mod database;
 mod mprober_api;
 mod mprober_api_resources;
 mod structs;
@@ -44,9 +45,10 @@ fn main() -> Result<(), Error>{
 async fn _main() {
     
     tracing_subscriber::fmt::init();
-    let bot_configs = BotConfig::load();
+    let bot_configs = BotConfig::load().await;
     let token_copy = bot_configs.token.clone();
     let mprober_api = MProberAPI::load();
+
     let data = structs::BotData { 
         bot_support: BotSupport{},
         bot_configs,

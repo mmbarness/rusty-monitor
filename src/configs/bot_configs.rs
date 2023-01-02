@@ -1,16 +1,19 @@
 use dotenv::{ dotenv };
 use gnomeutils::serenity::{GuildId};
+use crate::database::initialize::Database;
+
 #[derive(Debug, Clone)]
 pub struct BotConfig {
     pub token: String,
     pub environment: String,
+    pub database: Database,
     pub prefix: String,
     pub guild_id: GuildId,
 }
 
 impl BotConfig {
 
-    pub fn load () -> BotConfig {
+    pub async fn load () -> BotConfig {
 
         let args:Vec<String> = Self::env_vars();
 
@@ -18,6 +21,8 @@ impl BotConfig {
         let guild_id = Self::guild_id();
         let prefix = Self::prefix(&environment);
         let token = Self::token(&environment);
+        let db_password = Self::db_password();
+        let database = Database::load(&db_password).await;
 
         let parsed_guild_id = GuildId(guild_id);
 
@@ -25,6 +30,7 @@ impl BotConfig {
 
         BotConfig {
             environment,
+            database,
             guild_id: parsed_guild_id,
             prefix,
             token,
@@ -41,7 +47,17 @@ impl BotConfig {
             }
         };
         let args = std::env::args().collect();
+        println!("args: {:?}", args);
         args
+    }
+
+    fn db_password() -> String {
+        match std::env::var("DATABASE_PASSWORD") {
+            Ok(db_password) => db_password,
+            Err(_) => {
+                panic!("Error accessing db_password in .env")
+            }
+        }
     }
 
     fn prefix(mode:&String) -> String {

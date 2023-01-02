@@ -27,6 +27,7 @@ tracing-subscriber = "0.3.16"
 async-trait = "0.1.60"
 strum = "0.24.1"
 size = "0.4.1"
+sqlx = "0.6.2"
 
 [dependencies.gnomeutils]
 git = "https://github.com/GnomedDev/GnomeUtils"

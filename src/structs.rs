@@ -1,3 +1,5 @@
+use sqlx::{Postgres, PgPool};
+
 use crate::{configs::{bot_configs::BotConfig}, mprober_api::{api::MProberAPI}, bot_support::bot_support::BotSupport};
 
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
