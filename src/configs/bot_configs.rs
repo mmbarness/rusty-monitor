@@ -5,11 +5,41 @@ use crate::database::initialize::Database;
 #[derive(Debug, Clone)]
 pub struct BotConfig {
     pub token: String,
-    pub environment: String,
+    pub environment: Environment,
     pub database: Database,
     pub prefix: String,
     pub guild_id: GuildId,
 }
+
+#[derive(Debug, Clone, Copy)]
+pub enum Environment {
+    Dev,
+    Prod,
+    Test
+}
+
+impl Environment {
+    pub fn match_env(unvalidated_env: &str) -> Environment {
+        match unvalidated_env {
+            "dev" => Environment::Dev,
+            "prod" => Environment::Prod,
+            "test" => Environment::Test,
+            _ => panic!("Error parsing environment arg")                   
+        }
+    }
+}
+
+pub trait EnviromentString {
+    fn to_string(env: Environment) -> String {
+        match env {
+            Environment::Dev => "dev".to_string(),
+            Environment::Prod => "prod".to_string(),
+            Environment::Test => "test".to_string(),
+        }
+    }
+}
+
+impl EnviromentString for Environment {}
 
 impl BotConfig {
 
@@ -17,16 +47,16 @@ impl BotConfig {
 
         let args:Vec<String> = Self::env_vars();
 
-        let environment = Self::mode(&args);
+        let environment = Self::environment(&args);
         let guild_id = Self::guild_id();
         let prefix = Self::prefix(&environment);
         let token = Self::token(&environment);
-        let db_password = Self::db_password();
-        let database = Database::load(&db_password).await;
+        let (db_password, db_username) = Self::db_creds();
+        let database = Database::load(&db_password, &db_username, &environment).await;
 
         let parsed_guild_id = GuildId(guild_id);
 
-        println!("running in {} mode, with a command prefix of {}", environment, prefix);
+        println!("running in {} mode, with a command prefix of {}", Environment::to_string(environment), prefix);
 
         BotConfig {
             environment,
@@ -51,24 +81,31 @@ impl BotConfig {
         args
     }
 
-    fn db_password() -> String {
-        match std::env::var("DATABASE_PASSWORD") {
+    fn db_creds() -> (String, String) {
+        let username = match std::env::var("DATABASE_USERNAME") {
+            Ok(db_username) => db_username,
+            Err(_) => {
+                panic!("Error accessing DATABASE_USERNAME in .env")
+            }
+        };
+        let password = match std::env::var("DATABASE_PASSWORD") {
             Ok(db_password) => db_password,
             Err(_) => {
-                panic!("Error accessing db_password in .env")
+                panic!("Error accessing DATABASE_PASSWORD in .env")
             }
-        }
+        };
+        (username, password)
     }
 
-    fn prefix(mode:&String) -> String {
-        match mode.as_str() {
-            "dev" => "~~".to_string(),
-            "prod" => "~".to_string(),
+    fn prefix(mode:&Environment) -> String {
+        match mode {
+            Environment::Dev => "~~".to_string(),
+            Environment::Prod => "~".to_string(),
             _ => panic!("Error parsing environment arg")  
         }
     }
 
-    fn mode(args: &Vec<String>) -> String {
+    fn environment(args: &Vec<String>) -> Environment {
         let environment = args.iter().find(|ele| match ele.as_str() {
             "dev" => true,
             "prod" => true,
@@ -76,11 +113,7 @@ impl BotConfig {
         });
 
         return match environment {
-            Some(env) => match env.as_str() {
-                "dev" => "dev".to_string(),
-                "prod" => "prod".to_string(),
-                _ => panic!("Error parsing environment arg")                   
-            }
+            Some(env) => Environment::match_env(env),
             None => panic!("Did you provide an environment as an argument? Options are 'prod' or 'dev'")
         };
     }
@@ -94,15 +127,15 @@ impl BotConfig {
         }
     }
 
-    fn token(environment:&String) -> String {    
-        return match environment.as_str() {
-            "dev" => match std::env::var("DEV_DISCORD_TOKEN") {
+    fn token(environment:&Environment) -> String {    
+        return match environment {
+            Environment::Dev => match std::env::var("DEV_DISCORD_TOKEN") {
                 Ok(token) => token,
                 Err(_) => {
                     panic!("Error accessing bot token in .env")
                 }
             }
-            "prod" => match std::env::var("PROD_DISCORD_TOKEN") {
+            Environment::Prod => match std::env::var("PROD_DISCORD_TOKEN") {
                 Ok(token) => token,
                 Err(_) => {
                     panic!("Error accessing bot token in .env")

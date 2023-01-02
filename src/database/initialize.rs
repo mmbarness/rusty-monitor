@@ -1,4 +1,6 @@
 use sqlx::{PgPool, postgres::PgQueryResult};
+use crate::configs::bot_configs::Environment;
+
 use super::schemas::TableSchemas;
 
 #[derive(Debug, Clone)]
@@ -7,8 +9,8 @@ pub struct Database {
 }
 
 impl Database {
-    pub async fn load(password: &str) -> Self {
-        let database = Self::connect(password).await;
+    pub async fn load(username: &str, password: &str, env: &Environment) -> Self {
+        let database = Self::connect(username, password, env).await;
         Self::migrate(&database).await;
         Self::create_all_tables(&database).await;
         Database {
@@ -23,13 +25,18 @@ impl Database {
         Self::create(&schemas.monitor, database).await.expect("failed to create monitor table");
     }
 
-    async fn connect(db_password: &str) -> PgPool {
+    async fn connect(username: &str, db_password: &str, env: &Environment) -> PgPool {
+        let database_name = match env {
+            Environment::Prod => "rusty-monitor-prod",
+            Environment::Dev => "rusty-monitor-dev",
+            Environment::Test => "rusty-monitor-test",
+        };
         sqlx::postgres::PgPoolOptions::new()
             .max_connections(3)
             .connect_with(
                 sqlx::postgres::PgConnectOptions::new()
-                    .database("rusty-monitor-test")
-                    .username("postgres")
+                    .database(database_name)
+                    .username(username)
                     .password(&db_password)
                 )
             .await
