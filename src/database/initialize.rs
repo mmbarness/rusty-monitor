@@ -18,6 +18,14 @@ impl Database {
         }
     }
 
+    pub fn full_name(env: &Environment) -> String {
+        match env {
+            Environment::Dev => "rusty-monitor-dev".to_string(),
+            Environment::Prod => "rusty-monitor-prod".to_string(),
+            Environment::Test => "rusty-monitor-test".to_string(),
+        }
+    }
+
     pub async fn create_all_tables(database: &PgPool) -> () {
         let schemas = TableSchemas::get_all();
         Self::create(&schemas.monitoring_server, database).await.expect("Failed to create monitoring server table");
@@ -26,11 +34,7 @@ impl Database {
     }
 
     async fn connect(username: &str, db_password: &str, env: &Environment) -> PgPool {
-        let database_name = match env {
-            Environment::Prod => "rusty-monitor-prod",
-            Environment::Dev => "rusty-monitor-dev",
-            Environment::Test => "rusty-monitor-test",
-        };
+        let database_name = &Self::full_name(env);
         sqlx::postgres::PgPoolOptions::new()
             .max_connections(3)
             .connect_with(
