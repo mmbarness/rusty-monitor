@@ -9,7 +9,8 @@ mod mprober_api_resources;
 mod structs;
 mod timer;
 mod thread_channel;
-use bot_support::bot_support::BotSupport;
+mod models;
+use bot_support::{bot_support::BotSupport, manage_user::ManageUser};
 use mprober_api::api::MProberAPI;
 use configs::{bot_configs::BotConfig};
 use structs::{BotData};
@@ -53,6 +54,7 @@ async fn _main() {
         bot_support: BotSupport{},
         bot_configs,
         mprober_api,
+        user: None,
     };
     
     let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
@@ -71,6 +73,7 @@ async fn _main() {
                 commands::cpu::cpu_load(),
                 commands::memory::memory(),
                 commands::monitor::start_monitor(),
+                commands::new_user::new_user(),
                 commands::register::register(),
             ],
             prefix_options: poise::PrefixFrameworkOptions {
@@ -94,9 +97,17 @@ async fn _main() {
                 })
             },
             /// Every command invocation must pass this check to continue execution
-            command_check: Some(|_ctx| {
+            command_check: Some(|ctx| {
                 Box::pin(async move {
-                    return Ok(true);
+                    match BotSupport::pre_command_check(&ctx).await {
+                        Some(user) => {
+                            Ok(true)
+                        },
+                        None => {
+                            ctx.say("You\'re a new user, and I don't have your server information on file. Register yourself with the /new_user command").await.expect("unable to send message");
+                            Ok(false)
+                        }
+                    }
                 })
             }),
             ..Default::default()

@@ -1,2 +1,2 @@
-pub mod schemas;
 pub mod initialize;
+pub mod setup;

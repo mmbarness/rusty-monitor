@@ -27,10 +27,7 @@ impl Environment {
             _ => panic!("Error parsing environment arg")                   
         }
     }
-}
-
-pub trait EnviromentString {
-    fn to_string(env: Environment) -> String {
+    pub fn to_string(env: Environment) -> String {
         match env {
             Environment::Dev => "dev".to_string(),
             Environment::Prod => "prod".to_string(),
@@ -38,8 +35,6 @@ pub trait EnviromentString {
         }
     }
 }
-
-impl EnviromentString for Environment {}
 
 impl BotConfig {
 
@@ -51,8 +46,8 @@ impl BotConfig {
         let guild_id = Self::guild_id();
         let prefix = Self::prefix(&environment);
         let token = Self::token(&environment);
-        let (db_password, db_username) = Self::db_creds();
-        let database = Database::load(&db_password, &db_username, &environment).await;
+        let db_url = Self::db_url(&environment);
+        let database = Database::load(&db_url).await;
 
         let parsed_guild_id = GuildId(guild_id);
 
@@ -81,20 +76,27 @@ impl BotConfig {
         args
     }
 
-    fn db_creds() -> (String, String) {
-        let username = match std::env::var("DATABASE_USERNAME") {
-            Ok(db_username) => db_username,
-            Err(_) => {
-                panic!("Error accessing DATABASE_USERNAME in .env")
+    fn db_url(environment: &Environment) -> String {
+        match environment {
+            Environment::Dev => match std::env::var("DEV_DATABASE_URL") {
+                Ok(url) => url,
+                Err(_) => {
+                    panic!("Error accessing DATABASE_USERNAME in .env")
+                }
+            },
+            Environment::Test => match std::env::var("TEST_DATABASE_URL") {
+                Ok(url) => url,
+                Err(_) => {
+                    panic!("Error accessing DATABASE_USERNAME in .env")
+                }
+            },
+            Environment::Prod => match std::env::var("PROD_DATABASE_URL") {
+                Ok(url) => url,
+                Err(_) => {
+                    panic!("Error accessing DATABASE_USERNAME in .env")
+                }
             }
-        };
-        let password = match std::env::var("DATABASE_PASSWORD") {
-            Ok(db_password) => db_password,
-            Err(_) => {
-                panic!("Error accessing DATABASE_PASSWORD in .env")
-            }
-        };
-        (username, password)
+        }
     }
 
     fn prefix(mode:&Environment) -> String {

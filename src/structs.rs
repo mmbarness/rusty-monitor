@@ -8,6 +8,7 @@ pub struct BotData {
     pub bot_support: BotSupport,
     pub bot_configs: BotConfig,
     pub mprober_api: MProberAPI,
+    pub user: Option<entity::users::Model>,
 }
 
 pub type Command = poise::Command<BotData, CommandError>;

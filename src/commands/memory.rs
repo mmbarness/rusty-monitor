@@ -1,5 +1,6 @@
 use crate::bot_support::bot_support::BotSupport;
 use crate::Error;
+use crate::bot_support::defer::Defer;
 use crate::mprober_api_resources;
 use mprober_api_resources::{
     memory::{

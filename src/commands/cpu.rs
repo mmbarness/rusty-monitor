@@ -1,4 +1,4 @@
-use crate::{structs::Context, Error, bot_support::bot_support::BotSupport, mprober_api_resources::{cpu::CPULoad, shared_traits::Compute}};
+use crate::{structs::Context, Error, bot_support::{bot_support::BotSupport, defer::Defer}, mprober_api_resources::{cpu::CPULoad, shared_traits::Compute}};
 use std::convert::From;
 
 #[poise::command(track_edits, slash_command)]
