@@ -1,6 +1,6 @@
 #![feature(async_fn_in_trait)]
 #![warn(clippy::str_to_string)]
-mod bot_support;
+mod bot;
 mod configs;
 mod commands;
 mod database;
@@ -10,18 +10,17 @@ mod structs;
 mod timer;
 mod thread_channel;
 mod models;
-use bot_support::{bot_support::BotSupport, manage_user::ManageUser};
-use mprober_api::api::MProberAPI;
-use configs::{bot_configs::BotConfig};
-use structs::{BotData};
+use bot::{support::Support, manage_user::ManageUser, data::{Data}, Bot, load::Load};
+use configs::{bot_configs::Config};
 use std::time::Duration;
 use poise::serenity_prelude::GatewayIntents;
 type Error = Box<dyn std::error::Error + Send + Sync>;
 
-async fn on_error(error: poise::FrameworkError<'_, BotData, Error>) {
+async fn on_error(error: poise::FrameworkError<'_, Bot, Error>) {
     // This is our custom error handler
     // They are many errors that can occur, so we only handle the ones we want to customize
     // and forward the rest to the default handler
+    println!("error: {}", error);
     match error {
         poise::FrameworkError::Setup { error, .. } => panic!("Failed to start bot: {:?}", error),
         poise::FrameworkError::Command { error, ctx } => {
@@ -44,37 +43,35 @@ fn main() -> Result<(), Error>{
 }
 
 async fn _main() {
-    
     tracing_subscriber::fmt::init();
-    let bot_configs = BotConfig::load().await;
-    let token_copy = bot_configs.token.clone();
-    let mprober_api = MProberAPI::load();
 
-    let data = structs::BotData { 
-        bot_support: BotSupport{},
-        bot_configs,
-        mprober_api,
-        user: None,
-    };
-    
+    let configs = Config::load().await;
+
     let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
-
+    
     poise::Framework::builder()
-        .token(token_copy)
-        .setup(move |_ctx, _ready, _framework| {
+        .token(configs.token.clone())
+        .setup(move |ctx, _ready, _framework| {
             Box::pin(async move {
-                Ok(data)
+                let bot = match Bot::on_setup().await {
+                    Ok(bot) => bot,
+                    Err(e) =>  {
+                        panic!("error starting bot: {}", e);
+                    }
+                };
+                Ok(bot)
             })
         })
         .options(poise::FrameworkOptions {
             commands: vec![
-                commands::help::help(),
                 commands::cpu::cpu_info(),
+                commands::help::help(),
                 commands::cpu::cpu_load(),
                 commands::memory::memory(),
                 commands::monitor::start_monitor(),
                 commands::new_user::new_user(),
                 commands::register::register(),
+                commands::who_am_i::who_am_i(),
             ],
             prefix_options: poise::PrefixFrameworkOptions {
                 edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),
@@ -86,6 +83,15 @@ async fn _main() {
             /// This code is run before every command
             pre_command: |ctx| {
                 Box::pin(async move {
+                    let modified_bot = match Bot::on_pre_command(&ctx).await {
+                        Ok(bot_with_models) => bot_with_models,
+                        Err(e) => {
+                            println!("unable to write active models to ctx data: {}", e);
+                            ctx.data().clone()
+                        }
+                    };
+                    println!("writing models to bot data");
+                    ctx.set_invocation_data::<Bot>(modified_bot).await;
                     println!("Executing command {}...", ctx.command().qualified_name);
                 })
             },
@@ -99,13 +105,20 @@ async fn _main() {
             /// Every command invocation must pass this check to continue execution
             command_check: Some(|ctx| {
                 Box::pin(async move {
-                    match BotSupport::pre_command_check(&ctx).await {
-                        Some(user) => {
+                    match Support::get_user_if_exists(&ctx).await {
+                        Some(_) => {
                             Ok(true)
                         },
                         None => {
-                            ctx.say("You\'re a new user, and I don't have your server information on file. Register yourself with the /new_user command").await.expect("unable to send message");
-                            Ok(false)
+                            match ctx.command().identifying_name.as_str() {
+                                "register" => Ok(true),
+                                "new_user" => Ok(true),
+                                "who_am_i" => Ok(true),
+                                _ => {
+                                    ctx.say("You\'re a new user, and I don't have your server information on file. Register yourself with the /new_user command").await.expect("unable to send message");
+                                    Ok(false)
+                                }
+                            }
                         }
                     }
                 })

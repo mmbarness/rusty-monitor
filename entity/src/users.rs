@@ -9,6 +9,8 @@ pub struct Model {
     pub id: i32,
     pub discord_id: i64,
     pub user_name: String,
+    pub admin: bool,
+    pub premium: bool,
     pub created_at: Date,
 }
 

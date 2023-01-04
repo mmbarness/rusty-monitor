@@ -24,6 +24,8 @@ impl MigrationTrait for Migration {
                             .not_null()
                     )
                     .col(ColumnDef::new(Users::UserName).string().not_null())
+                    .col(ColumnDef::new(Users::Admin).boolean().not_null())
+                    .col(ColumnDef::new(Users::Premium).boolean().not_null())
                     .col(ColumnDef::new(Users::CreatedAt).date().not_null())
                     .to_owned(),
             )
@@ -42,7 +44,9 @@ impl MigrationTrait for Migration {
 pub enum Users {
     Table,
     Id,
+    Admin,
     DiscordId,
+    Premium,
     UserName,
     CreatedAt,
 }

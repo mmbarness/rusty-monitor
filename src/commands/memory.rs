@@ -1,6 +1,6 @@
-use crate::bot_support::bot_support::BotSupport;
+use crate::bot::support::Support;
 use crate::Error;
-use crate::bot_support::defer::Defer;
+use crate::bot::defer::Defer;
 use crate::mprober_api_resources;
 use mprober_api_resources::{
     memory::{
@@ -12,6 +12,7 @@ use mprober_api_resources::{
         FieldsToArray
     }
 };
+use crate::mprober_api::api::MProberAPI;
 use std::convert::From;
 use crate::structs::Context;
 
@@ -31,9 +32,15 @@ async fn all(
     _command: Option<String>,
 ) -> Result<(), Error> {
 
-    BotSupport::defer(&ctx).await;
+    Support::defer(&ctx).await;
 
-    let mprober_api = &ctx.data().mprober_api;
+    let mprober_api = match MProberAPI::validate_from_invocation_data(ctx).await {
+        Ok(api) => api,
+        Err(e) => {
+            ctx.say("we weren\t able to get your server info. Maybe try again.").await;
+            return Err("error parsing server info from db".into())
+        }
+    };
             
     let memory_and_swap = mprober_api.requester.memory().await;
 
@@ -56,9 +63,15 @@ async fn free(
     _command: Option<String>,
 ) -> Result<(), Error> {
 
-    BotSupport::defer(&ctx).await;
+    Support::defer(&ctx).await;
 
-    let mprober_api = &ctx.data().mprober_api;
+    let mprober_api = match MProberAPI::validate_from_invocation_data(ctx).await {
+        Ok(api) => api,
+        Err(e) => {
+            ctx.say("we weren\t able to get your server info. Maybe try again.").await;
+            return Err("error parsing server info from db".into())
+        }
+    };
             
     let memory_and_swap = mprober_api.requester.memory().await;
     let formatted_mem_and_swap = memory_and_swap.responses();
@@ -83,9 +96,15 @@ async fn cache(
     _command: Option<String>,
 ) -> Result<(), Error> {
 
-    BotSupport::defer(&ctx).await;
+    Support::defer(&ctx).await;
 
-    let mprober_api = &ctx.data().mprober_api;
+    let mprober_api = match MProberAPI::validate_from_invocation_data(ctx).await {
+        Ok(api) => api,
+        Err(e) => {
+            ctx.say("we weren\t able to get your server info. Maybe try again.").await;
+            return Err("error parsing server info from db".into())
+        }
+    };
             
     let memory_and_swap = mprober_api.requester.memory().await;
     let formatted_mem_and_swap = memory_and_swap.format_all_fields();
@@ -110,9 +129,15 @@ async fn swap(
     _command: Option<String>,
 ) -> Result<(), Error> {
 
-    BotSupport::defer(&ctx).await;
+    Support::defer(&ctx).await;
 
-    let mprober_api = &ctx.data().mprober_api;
+    let mprober_api = match MProberAPI::validate_from_invocation_data(ctx).await {
+        Ok(api) => api,
+        Err(e) => {
+            ctx.say("we weren\t able to get your server info. Maybe try again.").await;
+            return Err("error parsing server info from db".into())
+        }
+    };
             
     let memory_and_swap = mprober_api.requester.memory().await;
     let formatted_fields = memory_and_swap.swap.responses();
@@ -146,9 +171,15 @@ async fn in_the_red(
         None => (0.5, true),
     };
 
-    BotSupport::defer(&ctx).await;
+    Support::defer(&ctx).await;
 
-    let mprober_api = &ctx.data().mprober_api;
+    let mprober_api = match MProberAPI::validate_from_invocation_data(ctx).await {
+        Ok(api) => api,
+        Err(e) => {
+            ctx.say("we weren\t able to get your server info. Maybe try again.").await;
+            return Err("error parsing server info from db".into())
+        }
+    };
             
     let memory_and_swap = mprober_api.requester.memory().await;
     

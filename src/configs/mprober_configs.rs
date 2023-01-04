@@ -1,28 +1,36 @@
 use core::panic;
 use std::{collections::HashMap};
 use dotenv::{dotenv};
+use entity::target_server::Model;
+use serde::Deserialize;
 use tokio::{time};
 use crate::{mprober_api::{schemas::Endpoints}};
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct MProberConfigs {
     pub address: String,
-    pub api_key: String,
-    pub port: u64,
+    pub api_key: Option<i32>,
+    pub auth: bool,
+    pub port: i32,
     pub polling_frequency: time::Duration,
 }
 
 impl MProberConfigs {
-    pub fn load() -> MProberConfigs {
+    pub fn load(target_server: &Model) -> MProberConfigs {
         Self::env_vars();
 
-        let address = Self::address();
-        let api_key = Self::api_key();
-        let port = Self::port();
+        let address = target_server.address.clone();
+        let auth = target_server.auth.clone();
+        let api_key = match auth {
+            true => target_server.auth_key.clone(),
+            false => None,
+        };
+        let port = target_server.port.clone();
         let polling_frequency = Self::polling_frequency();
 
         MProberConfigs { 
             address,
             api_key,
+            auth,
             port,
             polling_frequency,
         }

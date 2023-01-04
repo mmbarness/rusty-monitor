@@ -1,4 +1,4 @@
-use super::bot_support::BotSupport;
+use super::support::Support;
 use crate::structs::Context;
 
 #[async_trait::async_trait]
@@ -16,4 +16,4 @@ pub trait Defer {
 
 }
 
-impl Defer for BotSupport {}
+impl Defer for Support {}

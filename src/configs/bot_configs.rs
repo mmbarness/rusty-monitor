@@ -1,9 +1,10 @@
 use dotenv::{ dotenv };
 use gnomeutils::serenity::{GuildId};
+use serde::Deserialize;
 use crate::database::initialize::Database;
 
 #[derive(Debug, Clone)]
-pub struct BotConfig {
+pub struct Config {
     pub token: String,
     pub environment: Environment,
     pub database: Database,
@@ -11,7 +12,7 @@ pub struct BotConfig {
     pub guild_id: GuildId,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum Environment {
     Dev,
     Prod,
@@ -36,10 +37,9 @@ impl Environment {
     }
 }
 
-impl BotConfig {
+impl Config {
 
-    pub async fn load () -> BotConfig {
-
+    pub async fn load () -> Config {
         let args:Vec<String> = Self::env_vars();
 
         let environment = Self::environment(&args);
@@ -51,9 +51,9 @@ impl BotConfig {
 
         let parsed_guild_id = GuildId(guild_id);
 
-        println!("running in {} mode, with a command prefix of {}", Environment::to_string(environment), prefix);
+        println!("running in {} mode, with a command prefix of {}", Environment::to_string(environment.clone()), prefix);
 
-        BotConfig {
+        Config {
             environment,
             database,
             guild_id: parsed_guild_id,

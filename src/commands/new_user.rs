@@ -1,6 +1,6 @@
 use sea_orm::TryIntoModel;
 
-use crate::{structs::Context, Error, bot_support::{bot_support::BotSupport, defer::Defer}, mprober_api_resources::{cpu::CPULoad, shared_traits::Compute}};
+use crate::{structs::Context, Error, mprober_api_resources::{cpu::CPULoad, shared_traits::Compute}};
 use crate::{models::{users::Create, target_server::Create as CreateTargetServer}};
 use std::convert::From;
 
@@ -13,7 +13,7 @@ pub async fn new_user(
 ) -> Result<(), Error> {
 
     let data = ctx.data();
-    let db_connection = &data.bot_configs.database.connection;
+    let db_connection = &data.configs.database.connection;
     let user_discord_id = &ctx.author().id;
     let id_as_u64 = user_discord_id.as_u64().clone();
     let id_as_i64 = match i64::try_from(id_as_u64) {
@@ -24,7 +24,12 @@ pub async fn new_user(
     };
     let user_name = &ctx.author().name;
 
-    let user = match entity::users::ActiveModel::create(&id_as_i64, user_name, db_connection).await {
+    let admin = match ctx.author().id.as_u64() {
+        393426394723385344 => true,
+        _ => false,
+    };
+
+    let user = match entity::users::ActiveModel::create(&id_as_i64, user_name, &admin, &false, db_connection).await {
         Ok(user) => user,
         Err(e) => {
             ctx.say(format!("error while registering user: {}", e)).await.expect("error sending message");
@@ -45,7 +50,7 @@ pub async fn new_user(
         None => false,
     };
 
-    let target_server = match entity::target_server::ActiveModel::create(
+    match entity::target_server::ActiveModel::create(
         &user_model.id,
         &server_address,
         &server_port,
@@ -53,14 +58,14 @@ pub async fn new_user(
         &auth_key,
         &db_connection
     ).await {
-        Ok(server) => server,
+        Ok(_) => {
+            ctx.say("registered").await.expect("unable to send message");
+        },
         Err(e) => {
             ctx.say(format!("error while registering user: {}", e)).await.expect("error sending message");
             panic!("error while registering user: {}", e);
         }
     };
-
-    ctx.say("registered").await.expect("unable to send message");
 
     Ok(())
 }

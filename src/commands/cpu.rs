@@ -1,13 +1,30 @@
-use crate::{structs::Context, Error, bot_support::{bot_support::BotSupport, defer::Defer}, mprober_api_resources::{cpu::CPULoad, shared_traits::Compute}};
-use std::convert::From;
+use serenity::Error;
+
+use crate::{structs::{Context, Error as CommandError}, bot::{support::Support, defer::Defer, Bot}, mprober_api_resources::{cpu::CPULoad, shared_traits::Compute}, mprober_api::api::MProberAPI};
+use std::{convert::From, f32::consts::E};
 
 #[poise::command(track_edits, slash_command)]
 pub async fn cpu_info(
     ctx: Context<'_>,
     _command: Option<String>,
-) -> Result<(), Error> {
+) -> Result<(), CommandError> {
 
-    let mprober_api = &ctx.data().mprober_api;
+    let invo_data = match ctx.invocation_data::<Bot>().await {
+        Some(bot) => bot,
+        None => {
+            ctx.say("we weren\t able to get your server info. Maybe try again.").await;
+            return Err("error parsing server info from db".into())
+        }
+    };
+
+    let mprober_api = match MProberAPI::validate_from_invocation_data(ctx).await {
+        Ok(api) => api,
+        Err(e) => {
+            ctx.say("we weren\t able to get your server info. Maybe try again.").await;
+            println!("error: {}", e);
+            return Err("error parsing server info from db".into())
+        }
+    };
 
     let cpus = mprober_api.requester.cpus().await;
     // going to for now not handle multi-cpu systems
@@ -46,11 +63,18 @@ pub async fn cpu_info(
 pub async fn cpu_load(
     ctx: Context<'_>,
     _command: Option<String>,
-) -> Result<(), Error> {
+) -> Result<(), CommandError> {
 
-    BotSupport::defer(&ctx).await;
+    Support::defer(&ctx).await;
 
-    let mprober_api = &ctx.data().mprober_api;
+    let mprober_api = match MProberAPI::validate_from_invocation_data(ctx).await {
+        Ok(api) => api,
+        Err(e) => {
+            ctx.say("we weren\t able to get your server info. Maybe try again.").await;
+            println!("error: {}", e);
+            return Err("error parsing server info from db".into())
+        }
+    };
             
     let cpus = mprober_api.requester.cpu_load().await;
     let cpus_stat = &cpus.cpus_stat;
