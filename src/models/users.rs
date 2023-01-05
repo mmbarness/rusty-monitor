@@ -1,8 +1,7 @@
 use chrono::prelude::*;
 use entity::users::{Entity as Users, self};
-use migration::{DbErr, SimpleExpr};
+use migration::{DbErr};
 use sea_orm::{DatabaseConnection, EntityTrait, ActiveValue, ActiveModelTrait, QueryFilter, ColumnTrait};
-use sqlx::Column;
 
 // Find by primary key
 #[async_trait::async_trait]

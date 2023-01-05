@@ -1,14 +1,14 @@
-use crate::mprober_api::api::MProberAPI;
+use crate::bot::invocation_data::InvocationData;
 use crate::mprober_api_resources::shared_traits::Compute;
 use crate::mprober_api_resources::cpu::{CPULoad};
 use gnomeutils::serenity::{ChannelId};
 use tokio::{ time };
 
-pub async fn cpu_monitor(ctx:poise::serenity_prelude::Context, mprober_api: MProberAPI, channel_id: ChannelId, load_threshold:f64) -> () {
+pub async fn cpu_monitor(ctx:poise::serenity_prelude::Context, invo_data: InvocationData, channel_id: ChannelId, load_threshold:f64) -> () {
     tokio::spawn(async move {
         let mut interval = time::interval(time::Duration::from_secs(10));
         loop {
-            let cpus = mprober_api.requester.cpu_load().await;
+            let cpus = invo_data.mprober_api.requester.cpu_load(&invo_data.target_server).await;
             interval.tick().await;
             let cpus_stat = &cpus.cpus_stat;
             let cpus_average = CPULoad::avg(cpus_stat);

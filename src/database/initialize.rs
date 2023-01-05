@@ -1,6 +1,5 @@
 use sea_orm::{Database as SeaDatabase, DatabaseConnection};
 use migration::{Migrator, MigratorTrait};
-use serde::Deserialize;
 
 #[derive(Debug, Clone)]
 pub struct Database {

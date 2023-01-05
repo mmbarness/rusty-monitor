@@ -7,13 +7,7 @@ pub async fn who_am_i(
     ctx: Context<'_>,
 ) -> Result<(), Error> {
 
-    let invo_data = match ctx.invocation_data::<InvocationData>().await {
-        Some(bot) => bot.clone(),
-        None => {
-            ctx.say("we weren\t able to get your server info. Maybe try again.").await;
-            return Err("error parsing server info from db".into())
-        }
-    };
+    let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
 
     let user = &invo_data.user;
     let target_server = &invo_data.target_server;

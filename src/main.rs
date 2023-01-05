@@ -51,7 +51,7 @@ async fn _main() {
     
     poise::Framework::builder()
         .token(configs.token.clone())
-        .setup(move |ctx, _ready, _framework| {
+        .setup(move |_ctx, _ready, _framework| {
             Box::pin(async move {
                 let bot = match Bot::on_setup().await {
                     Ok(bot) => bot,

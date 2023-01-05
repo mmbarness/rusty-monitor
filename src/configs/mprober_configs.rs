@@ -36,7 +36,7 @@ impl MProberConfigs {
         }
     }
 
-    pub fn build_address(endpoint: Endpoints) -> String {
+    pub fn build_address(address: &String, port: &String, endpoint: Endpoints) -> String {
         let binding = Self::endpoints();
         let endpoint_str = match binding.get(&endpoint) {
             Some(str) => str,
@@ -44,7 +44,7 @@ impl MProberConfigs {
                 panic!("endpoint not in endpoints hashmap")
             }
         };
-        Self::address().clone() + &endpoint_str.clone()
+        address.clone() + ":" + &port.clone() + &endpoint_str.clone()
     }
 
     fn endpoints() -> HashMap<Endpoints, String> {
@@ -73,24 +73,6 @@ impl MProberConfigs {
         };
     }
 
-    fn address() -> String {    
-        match std::env::var("ADDRESS") {
-            Ok(address) => address,
-            Err(_) => {
-                panic!("Error accessing server address in .env")
-            }
-        }
-    }
-
-    fn api_key() -> String {    
-        match std::env::var("API_KEY") {
-            Ok(api_key) => api_key,
-            Err(_) => {
-                panic!("Error accessing api key in .env")
-            }
-        }
-    }
-
     fn polling_frequency() -> time::Duration {    
         let ok_val = match std::env::var("POLLING_FREQUENCY") {
             Ok(address) => address,
@@ -110,13 +92,5 @@ impl MProberConfigs {
 
         return duration;
     }
-    
-    fn port() -> u64 {    
-        return match std::env::var("PORT") {
-            Ok(address) => address.parse::<u64>().expect("Error parsing num from PORT value"),
-            Err(_) => {
-                panic!("Error accessing server address in .env")
-            }
-        }
-    }
+
 }

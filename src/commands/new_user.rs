@@ -1,8 +1,13 @@
 use sea_orm::TryIntoModel;
-
-use crate::{structs::Context, Error, mprober_api_resources::{cpu::CPULoad, shared_traits::Compute}};
-use crate::{models::{users::Create, target_server::Create as CreateTargetServer}};
 use std::convert::From;
+use crate::{
+    structs::Context,
+    Error,
+    models::{
+        users::Create,
+        target_server::Create as CreateTargetServer
+    }
+};
 
 #[poise::command(track_edits, slash_command)]
 pub async fn new_user(

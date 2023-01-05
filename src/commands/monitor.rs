@@ -1,6 +1,7 @@
 use std::{convert::From};
+use crate::bot::invocation_data::InvocationData;
 use crate::{Error, timer::run_timer::cpu_monitor, structs::Context};
-use crate::mprober_api::api::MProberAPI;
+
 #[poise::command(track_edits, slash_command)]
 pub async fn start_monitor(
     ctx: Context<'_>,
@@ -8,15 +9,9 @@ pub async fn start_monitor(
 ) -> Result<(), Error> {
     let serenity_ctx = ctx.serenity_context().clone();
     let channel_id = ctx.channel_id().clone();
-    let mprober_api = match MProberAPI::validate_from_invocation_data(ctx).await {
-        Ok(api) => api.clone(),
-        Err(e) => {
-            ctx.say("we weren\t able to get your server info. Maybe try again.").await;
-            return Err("error parsing server info from db".into())
-        }
-    };
+    let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
     tokio::spawn(async move {
-        cpu_monitor(serenity_ctx, mprober_api, channel_id, threshold).await;
+        cpu_monitor(serenity_ctx, invo_data, channel_id, threshold).await;
     });
     match ctx.say("began monitoring, i'll message you if something goes off the rails (or if i crash)").await {
         Ok(_) => {

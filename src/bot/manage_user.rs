@@ -1,6 +1,5 @@
 use crate::{structs::Context, models::users::Find};
-use entity::users::{ActiveModel as User, self};
-
+use entity::users::{ActiveModel as User};
 use super::support::Support;
 
 #[async_trait::async_trait]

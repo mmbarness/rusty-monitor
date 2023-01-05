@@ -1,7 +1,7 @@
 use entity::target_server::Model;
-use serenity::Error;
-
-use crate::{configs::mprober_configs::MProberConfigs, structs::Context, bot::{Bot, invocation_data::InvocationData}};
+use crate::{
+    configs::mprober_configs::MProberConfigs,
+};
 
 use super::{requester::Request, client::Client};
 #[derive(Debug, Clone)]
@@ -23,15 +23,5 @@ impl MProberAPI {
 
     fn requester(client: Client) -> Request {
         Request { client }
-    }
-
-    pub async fn validate_from_invocation_data(ctx: Context<'_>) -> Result<MProberAPI, Error> {
-        match ctx.invocation_data::<InvocationData>().await {
-            Some(bot) => Ok(bot.mprober_api.clone()),
-            None => {
-                ctx.say("we weren\t able to get your server info. Maybe try again.").await;
-                return Err(Error::Other("error pulling data from invocation_data, which means it wasn\'t set correctly in pre-command"))
-            }
-        }
     }
 }
