@@ -10,7 +10,7 @@ mod structs;
 mod timer;
 mod thread_channel;
 mod models;
-use bot::{support::Support, manage_user::ManageUser, data::{Data}, Bot, load::Load};
+use bot::{support::Support, manage_user::ManageUser, invocation_data::{InvocationData}, Bot, load::Load};
 use configs::{bot_configs::Config};
 use std::time::Duration;
 use poise::serenity_prelude::GatewayIntents;
@@ -83,15 +83,14 @@ async fn _main() {
             /// This code is run before every command
             pre_command: |ctx| {
                 Box::pin(async move {
-                    let modified_bot = match Bot::on_pre_command(&ctx).await {
-                        Ok(bot_with_models) => bot_with_models,
+                    match Bot::on_pre_command(&ctx).await {
+                        Ok(valid_invocation_data) => {
+                            ctx.set_invocation_data::<InvocationData>(valid_invocation_data).await;
+                        },
                         Err(e) => {
                             println!("unable to write active models to ctx data: {}", e);
-                            ctx.data().clone()
                         }
                     };
-                    println!("writing models to bot data");
-                    ctx.set_invocation_data::<Bot>(modified_bot).await;
                     println!("Executing command {}...", ctx.command().qualified_name);
                 })
             },
