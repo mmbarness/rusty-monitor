@@ -18,7 +18,7 @@ pub async fn new_user(
 ) -> Result<(), Error> {
 
     let data = ctx.data();
-    let db_connection = &data.configs.database.connection;
+    let db_connection = &data.database.connection;
     let user_discord_id = &ctx.author().id;
     let id_as_u64 = user_discord_id.as_u64().clone();
     let id_as_i64 = match i64::try_from(id_as_u64) {

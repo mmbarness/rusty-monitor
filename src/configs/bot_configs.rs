@@ -4,10 +4,10 @@ use crate::database::initialize::Database;
 
 #[derive(Debug, Clone)]
 pub struct Config {
-    pub token: String,
+    pub database_url: String,
     pub environment: Environment,
-    pub database: Database,
     pub prefix: String,
+    pub token: String,
     pub guild_id: GuildId,
 }
 
@@ -45,8 +45,7 @@ impl Config {
         let guild_id = Self::guild_id();
         let prefix = Self::prefix(&environment);
         let token = Self::token(&environment);
-        let db_url = Self::db_url(&environment);
-        let database = Database::load(&db_url).await;
+        let database_url = Self::db_url(&environment);
 
         let parsed_guild_id = GuildId(guild_id);
 
@@ -54,7 +53,7 @@ impl Config {
 
         Config {
             environment,
-            database,
+            database_url,
             guild_id: parsed_guild_id,
             prefix,
             token,

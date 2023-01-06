@@ -1,4 +1,4 @@
-use crate::{structs::Context, models::{target_server::Find}, bot::manage_user::ManageUser};
+use crate::{structs::Context, models::{target_server::Find}, bot::manage_user::QueryDb};
 use entity::target_server::ActiveModel as TargetServer;
 
 use super::support::Support;
@@ -6,7 +6,7 @@ use super::support::Support;
 #[async_trait::async_trait]
 pub trait ManageTargetServer {
     async fn get_server_if_exists(ctx: &Context<'_>) -> Option<entity::target_server::Model> {
-        let db_connection = &ctx.data().configs.database.connection;
+        let db_connection = &ctx.data().database.connection;
         let user = match Support::get_user_if_exists(&ctx).await {
             Some(u) => u,
             None => {

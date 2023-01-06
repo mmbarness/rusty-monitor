@@ -3,7 +3,7 @@ use entity::users::{ActiveModel as User};
 use super::support::Support;
 
 #[async_trait::async_trait]
-pub trait ManageUser {
+pub trait QueryDb {
     async fn get_user_if_exists(ctx: &Context<'_>) -> Option<entity::users::Model> {
         let user_discord_id = ctx.author().id;
         let id_as_u64 = user_discord_id.as_u64().clone();
@@ -13,7 +13,7 @@ pub trait ManageUser {
                 panic!("error converting discord id sourced from ctx to i32 used in database: {}", e);
             }
         };
-        let db_connection = &ctx.data().configs.database.connection;
+        let db_connection = &ctx.data().database.connection;
         User::find_by_discord_id(id_as_i64, db_connection).await
     }
 
@@ -26,7 +26,7 @@ pub trait ManageUser {
                 panic!("error converting discord id sourced from ctx to i32 used in database: {}", e);
             }
         };
-        let db_connection = &ctx.data().configs.database.connection;
+        let db_connection = &ctx.data().database.connection;
         match User::find_by_discord_id(id_as_i64, db_connection).await {
             Some(_) => true,
             None => false,
@@ -34,4 +34,4 @@ pub trait ManageUser {
     }
 }
 
-impl ManageUser for Support {}
+impl QueryDb for Support {}

@@ -10,7 +10,7 @@ mod structs;
 mod timer;
 mod thread_channel;
 mod models;
-use bot::{support::Support, manage_user::ManageUser, invocation_data::{InvocationData}, Bot, load::Load};
+use bot::{support::Support, manage_user::QueryDb, invocation_data::{InvocationData}, Bot, load::Load};
 use configs::{bot_configs::Config};
 use std::time::Duration;
 use poise::serenity_prelude::GatewayIntents;

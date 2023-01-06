@@ -1,4 +1,6 @@
-use crate::configs::bot_configs::Config;
+use sea_orm::DatabaseConnection;
+
+use crate::{configs::bot_configs::Config, database::initialize::Database};
 use self::load::Load;
 
 pub mod support;
@@ -12,6 +14,7 @@ pub mod load;
 pub struct Bot {
     pub support: support::Support,
     pub configs: Config,
+    pub database: Database,
 }
 
 impl Load for Bot {}

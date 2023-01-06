@@ -1,14 +1,16 @@
-use crate::{structs::{Context}, configs::bot_configs::Config, resource_api::api::ResourceApi};
-use super::{support::Support, invocation_data::InvocationData, Bot, manage_user::ManageUser, manage_target_server::ManageTargetServer};
+use crate::{structs::{Context}, configs::bot_configs::Config, resource_api::api::ResourceApi, database::initialize::Database};
+use super::{support::Support, invocation_data::InvocationData, Bot, manage_user::QueryDb, manage_target_server::ManageTargetServer};
 use std::fmt::Error;
 
 #[async_trait::async_trait]
 pub trait Load {
     async fn on_setup() -> Result<Bot, Error> {
         let configs = Config::load().await;
+        let database = Database::load(&configs.database_url).await;
 
         Ok(Bot {
             configs,
+            database,
             support: Support{},
         })
     }
