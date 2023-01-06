@@ -1,5 +1,6 @@
 pub mod cpu;
 pub mod date_time;
+pub mod hostname;
 pub mod memory;
 pub mod network;
 pub mod os;

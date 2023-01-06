@@ -3,8 +3,8 @@ use serenity::Error;
 #[derive(Debug, Clone)]
 pub struct InvocationData {
     pub resource_api: ResourceApi,
-    pub user: entity::users::Model,
-    pub target_server: entity::target_server::Model,
+    pub user: entity::users::ActiveModel,
+    pub target_server: entity::target_server::ActiveModel,
 }
 
 impl InvocationData {

@@ -24,7 +24,7 @@ pub async fn cpu_info(
     let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
     let resource_api = invo_data.resource_api;
 
-    let cpus = resource_api.requester.cpus(&invo_data.target_server).await;
+    let cpus = resource_api.requester.cpus().await;
     // going to for now not handle multi-cpu systems
     let cpu_1 = match cpus.cpus.first() {
         Some(cpu) => cpu,
@@ -68,7 +68,7 @@ pub async fn cpu_load(
     let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
     let resource_api = invo_data.resource_api;
             
-    let cpus = resource_api.requester.cpu_load(&invo_data.target_server).await;
+    let cpus = resource_api.requester.cpu_load().await;
     let cpus_stat = &cpus.cpus_stat;
     let cpus_average = CPULoad::avg(cpus_stat);
     let cpus_average_resp = format!("average load across cores: {}", CPULoad::percentage(&cpus_average));

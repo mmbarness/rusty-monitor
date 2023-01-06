@@ -39,7 +39,7 @@ async fn all(
     let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
     let resource_api = invo_data.resource_api;
             
-    let memory_and_swap = resource_api.requester.memory(&invo_data.target_server).await;
+    let memory_and_swap = resource_api.requester.memory().await;
 
     let formatted_fields = memory_and_swap.responses();
     let fields_array = formatted_fields.fields_to_array();
@@ -65,7 +65,7 @@ async fn free(
     let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
     let resource_api = invo_data.resource_api;
             
-    let memory_and_swap = resource_api.requester.memory(&invo_data.target_server).await;
+    let memory_and_swap = resource_api.requester.memory().await;
     let formatted_mem_and_swap = memory_and_swap.responses();
     
     let response = 
@@ -93,7 +93,7 @@ async fn cache(
     let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
     let resource_api = invo_data.resource_api;
             
-    let memory_and_swap = resource_api.requester.memory(&invo_data.target_server).await;
+    let memory_and_swap = resource_api.requester.memory().await;
     let formatted_mem_and_swap = memory_and_swap.format_all_fields();
 
     let response = 
@@ -121,7 +121,7 @@ async fn swap(
     let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
     let resource_api = invo_data.resource_api;
             
-    let memory_and_swap = resource_api.requester.memory(&invo_data.target_server).await;
+    let memory_and_swap = resource_api.requester.memory().await;
     let formatted_fields = memory_and_swap.swap.responses();
     let fields_array = formatted_fields.fields_to_array();
     
@@ -158,7 +158,7 @@ async fn in_the_red(
     let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
     let resource_api = invo_data.resource_api;
             
-    let memory_and_swap = resource_api.requester.memory(&invo_data.target_server).await;
+    let memory_and_swap = resource_api.requester.memory().await;
     
     let memory = &memory_and_swap.memory;
     let memory_ratio =  Memory::ratio(&memory.used, &memory.total);

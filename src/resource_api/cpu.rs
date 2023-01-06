@@ -1,4 +1,4 @@
-use entity::target_server::Model;
+use entity::target_server::{Model, ActiveModel};
 use reqwest::{Response};
 use crate::configs::resource_api_configs::ResourceApiConfigs;
 use crate::{resource_api_structs::shared_traits::Load};
@@ -7,9 +7,10 @@ use super::requester::{Request};
 use super::schemas::Endpoints;
 
 impl Request {
-    pub async fn cpus(&self, server: &Model) -> CPUs {
+    pub async fn cpus(&self) -> CPUs {
         let client = self.client.new();
-        let address = ResourceApiConfigs::build_address(&server.address, &server.port.to_string(), Endpoints::CPU);
+        let configs = &self.configs;
+        let address = ResourceApiConfigs::build_address(&configs.address, &configs.port.to_string(), Endpoints::CPU);
         let resp:Response = match client.get(address)
             .send()
             .await {
@@ -28,9 +29,10 @@ impl Request {
         return cpu;
     }
 
-    pub async fn cpu_load(&self, server: &Model) -> CPULoad{
+    pub async fn cpu_load(&self) -> CPULoad{
         let client = self.client.new();
-        let address = ResourceApiConfigs::build_address(&server.address, &server.port.to_string(), Endpoints::CpuDetect);
+        let configs = &self.configs;
+        let address = ResourceApiConfigs::build_address(&configs.address, &configs.port.to_string(), Endpoints::CpuDetect);
         let resp:Response = match client.get(address)
             .send()
             .await {

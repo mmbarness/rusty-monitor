@@ -8,7 +8,7 @@ pub async fn cpu_monitor(ctx:poise::serenity_prelude::Context, invo_data: Invoca
     tokio::spawn(async move {
         let mut interval = time::interval(time::Duration::from_secs(10));
         loop {
-            let cpus = invo_data.resource_api.requester.cpu_load(&invo_data.target_server).await;
+            let cpus = invo_data.resource_api.requester.cpu_load().await;
             interval.tick().await;
             let cpus_stat = &cpus.cpus_stat;
             let cpus_average = CPULoad::avg(cpus_stat);

@@ -1,6 +1,7 @@
-use crate::{structs::{Context}, configs::bot_configs::Config, resource_api::api::ResourceApi, database::initialize::Database};
-use super::{support::Support, invocation_data::InvocationData, Bot, manage_user::QueryDb, manage_target_server::ManageTargetServer};
-use std::fmt::Error;
+use sea_orm::IntoActiveModel;
+
+use crate::{structs::{Context, Error}, configs::bot_configs::Config, resource_api::api::ResourceApi, database::initialize::Database};
+use super::{support::Support, invocation_data::InvocationData, Bot, query_db::QueryDb};
 
 #[async_trait::async_trait]
 pub trait Load {
@@ -18,19 +19,24 @@ pub trait Load {
     async fn on_pre_command(ctx: &Context<'_>) -> Result<InvocationData, Error> {
 
         let user = match Support::get_user_if_exists(ctx).await {
-            Some(user) => user,
+            Some(user) => user.into_active_model(),
             None => {
-                return Err(Error)
+                return Err("unable to find user in pre_command".to_string().into())
             }
         };
         let target_server = match Support::get_server_if_exists(ctx).await {
-            Some(target_server) => target_server,
+            Some(target_server) => target_server.into_active_model(),
             None => {
-                return Err(Error)
+                return Err("unable to find server in pre_command".to_string().into())
             }
         };
 
-        let resource_api = ResourceApi::load(&target_server);
+        let resource_api = match ResourceApi::load(&target_server) {
+            Ok(api) => api,
+            Err(e) => {
+                return Err(e);
+            }
+        };
         
         let invocation_data = InvocationData {
             resource_api: resource_api,

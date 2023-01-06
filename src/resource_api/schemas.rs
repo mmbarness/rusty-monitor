@@ -11,14 +11,14 @@ pub struct ResourceApiResponse<D: Resource> {
 #[derive(Eq, Hash, Debug, PartialEq, EnumString, Clone, Copy)]
 #[strum(ascii_case_insensitive)]
 pub enum Endpoints {
-    Hostname,
-    Kernel,
-    Uptime,
-    Time,
+    All,
     CPU,
     CpuDetect,
+    Hostname,
+    Kernel,
     Memory,
     NetworkDetect,
+    Time,
+    Uptime,
     Volume,
-    All,
 }

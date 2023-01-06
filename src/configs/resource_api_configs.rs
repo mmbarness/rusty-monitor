@@ -1,10 +1,11 @@
 use core::panic;
-use std::{collections::HashMap};
+use std::{collections::HashMap, error, fmt};
 use dotenv::{dotenv};
-use entity::target_server::Model;
+use entity::target_server::{Model, ActiveModel, self};
+use sea_orm::{ActiveModelTrait, Unchanged, Set};
 use serde::Deserialize;
 use tokio::{time};
-use crate::{resource_api::{schemas::Endpoints}};
+use crate::{resource_api::{schemas::Endpoints}, Error};
 #[derive(Debug, Deserialize, Clone)]
 pub struct ResourceApiConfigs {
     pub address: String,
@@ -14,26 +15,37 @@ pub struct ResourceApiConfigs {
     pub polling_frequency: time::Duration,
 }
 
+#[derive(Debug, Clone)]
+struct ActiveModelParseError;
+
+impl fmt::Display for ActiveModelParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "invalid first item to double")
+    }
+}
+
+impl error::Error for ActiveModelParseError {}
+
 impl ResourceApiConfigs {
-    pub fn load(target_server: &Model) -> ResourceApiConfigs {
+    pub fn load(target_server: &ActiveModel) -> Result<ResourceApiConfigs, Error> {
         Self::env_vars();
 
-        let address = target_server.address.clone();
-        let auth = target_server.auth.clone();
+        let address = target_server.address.clone().unwrap();
+        let auth = target_server.auth.clone().unwrap();
         let api_key = match auth {
-            true => target_server.auth_key.clone(),
+            true =>  target_server.auth_key.clone().unwrap(),
             false => None,
         };
-        let port = target_server.port.clone();
+        let port = target_server.port.clone().unwrap();
         let polling_frequency = Self::polling_frequency();
 
-        ResourceApiConfigs { 
+        Ok(ResourceApiConfigs { 
             address,
             api_key,
             auth,
             port,
             polling_frequency,
-        }
+        })
     }
 
     pub fn build_address(address: &String, port: &String, endpoint: Endpoints) -> String {
@@ -44,6 +56,8 @@ impl ResourceApiConfigs {
                 panic!("endpoint not in endpoints hashmap")
             }
         };
+        let full_address = address.clone() + ":" + &port.clone() + &endpoint_str.clone();
+        println!("address: {}", full_address);
         address.clone() + ":" + &port.clone() + &endpoint_str.clone()
     }
 

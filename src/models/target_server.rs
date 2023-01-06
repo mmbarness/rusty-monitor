@@ -64,14 +64,15 @@ pub trait Create {
         Self::save(Self::new(user_id, server_address, server_port, auth, auth_key), db).await
     }
     fn new(user_id: &i32, server_address: &String, server_port: &i32, auth: &bool, auth_key: &Option<i32>) -> target_server::ActiveModel {
-        target_server::ActiveModel {
-            id: ActiveValue::NotSet,
+        let target_server = target_server::ActiveModel {
             user_id: ActiveValue::Set(user_id.clone()),
             address: ActiveValue::Set(server_address.clone()),
             port: ActiveValue::Set(server_port.clone()),
             auth: ActiveValue::Set(auth.clone()),
             auth_key: ActiveValue::Set(auth_key.clone()),
-        }
+            ..Default::default()
+        };
+        target_server
     }
     async fn save(target_server: target_server::ActiveModel, db: &DatabaseConnection) -> Result<target_server::ActiveModel, DbErr> {
         target_server.save(db).await

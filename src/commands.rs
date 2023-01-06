@@ -1,5 +1,6 @@
 pub mod cpu;
 pub mod help;
+pub mod hostname;
 pub mod memory;
 pub mod monitor;
 pub mod new_user;

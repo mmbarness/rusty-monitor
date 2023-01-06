@@ -47,9 +47,7 @@ impl Load for CPUs{
                 panic!("error parsing cpu data: #{}", e);
             }
         };
-        let cpu = mprober_response.data;
-
-        return cpu;
+        return mprober_response.data;
     }
 }
 
@@ -69,9 +67,7 @@ impl Load for CPULoad {
                 panic!("error parsing cpu data: #{}", e);
             }
         };
-        let cpu = mprober_response.data;
-
-        return cpu;
+        return mprober_response.data;;
     }
 }
 

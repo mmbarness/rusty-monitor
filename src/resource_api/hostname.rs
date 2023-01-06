@@ -1,16 +1,17 @@
-use entity::target_server::Model;
+use std::collections::HashMap;
+
 use reqwest::{Response};
+use crate::Error;
 use crate::configs::resource_api_configs::ResourceApiConfigs;
-use crate::resource_api_structs::memory::{MemoryAndSwap};
-use crate::{resource_api_structs::shared_traits::Load};
+use crate::resource_api_structs::hostname::HostName;
 use super::requester::{Request};
 use super::schemas::Endpoints;
 
 impl Request {
-    pub async fn memory(&self) -> MemoryAndSwap<u64> {
+    pub async fn host_name(&self) -> Result<HostName, Error> {
         let client = self.client.new();
         let configs = &self.configs;
-        let address = ResourceApiConfigs::build_address(&configs.address, &configs.port.to_string(), Endpoints::Memory);
+        let address = ResourceApiConfigs::build_address(&configs.address, &configs.port.to_string(), Endpoints::Hostname);
         let resp:Response = match client.get(address)
             .send()
             .await {
@@ -21,10 +22,9 @@ impl Request {
                     resp
                 },
                 Err(e) => {
-                    panic!("error making request to /memory: #{}", e)
+                   return Err(Box::new(e))
                 }
             };
-        let memory = MemoryAndSwap::load(resp).await;
-        return memory;
+            Ok(HostName::load(resp).await)
     }
 }
