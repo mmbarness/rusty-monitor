@@ -1,8 +1,8 @@
-use crate::{mprober_api::api::MProberAPI, structs::Context};
+use crate::{resource_api::api::ResourceApi, structs::Context};
 use serenity::Error;
 #[derive(Debug, Clone)]
 pub struct InvocationData {
-    pub mprober_api: MProberAPI,
+    pub resource_api: ResourceApi,
     pub user: entity::users::Model,
     pub target_server: entity::target_server::Model,
 }

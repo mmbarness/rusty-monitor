@@ -1,4 +1,4 @@
-use crate::{structs::{Context}, configs::bot_configs::Config, mprober_api::api::MProberAPI};
+use crate::{structs::{Context}, configs::bot_configs::Config, resource_api::api::ResourceApi};
 use super::{support::Support, invocation_data::InvocationData, Bot, manage_user::ManageUser, manage_target_server::ManageTargetServer};
 use std::fmt::Error;
 
@@ -6,7 +6,7 @@ use std::fmt::Error;
 pub trait Load {
     async fn on_setup() -> Result<Bot, Error> {
         let configs = Config::load().await;
-    
+
         Ok(Bot {
             configs,
             support: Support{},
@@ -28,10 +28,10 @@ pub trait Load {
             }
         };
 
-        let mprober_api = MProberAPI::load(&target_server);
+        let resource_api = ResourceApi::load(&target_server);
         
         let invocation_data = InvocationData {
-            mprober_api: mprober_api,
+            resource_api: resource_api,
             target_server: target_server,
             user: user,
         };

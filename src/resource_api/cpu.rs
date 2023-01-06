@@ -1,15 +1,15 @@
 use entity::target_server::Model;
 use reqwest::{Response};
-use crate::configs::mprober_configs::MProberConfigs;
-use crate::{mprober_api_resources::shared_traits::Load};
-use crate::mprober_api_resources::cpu::{CPUs, CPULoad};
+use crate::configs::resource_api_configs::ResourceApiConfigs;
+use crate::{resource_api_structs::shared_traits::Load};
+use crate::resource_api_structs::cpu::{CPUs, CPULoad};
 use super::requester::{Request};
 use super::schemas::Endpoints;
 
 impl Request {
     pub async fn cpus(&self, server: &Model) -> CPUs {
         let client = self.client.new();
-        let address = MProberConfigs::build_address(&server.address, &server.port.to_string(), Endpoints::CPU);
+        let address = ResourceApiConfigs::build_address(&server.address, &server.port.to_string(), Endpoints::CPU);
         let resp:Response = match client.get(address)
             .send()
             .await {
@@ -30,7 +30,7 @@ impl Request {
 
     pub async fn cpu_load(&self, server: &Model) -> CPULoad{
         let client = self.client.new();
-        let address = MProberConfigs::build_address(&server.address, &server.port.to_string(), Endpoints::CpuDetect);
+        let address = ResourceApiConfigs::build_address(&server.address, &server.port.to_string(), Endpoints::CpuDetect);
         let resp:Response = match client.get(address)
             .send()
             .await {

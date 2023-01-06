@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use futures::Future;
 use tokio::sync::oneshot::Receiver;
 
-use crate::mprober_api_resources::cpu::CPUs;
+use crate::resource_api_structs::cpu::CPUs;
 
 use super::{wrapper::Wrapper};
 

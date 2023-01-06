@@ -1,6 +1,6 @@
 use sqlx::{Postgres, PgPool};
 
-use crate::{configs::{bot_configs::Config}, mprober_api::{api::MProberAPI}, bot::{support::Support,Bot}};
+use crate::{configs::{bot_configs::Config}, resource_api::{api::ResourceApi}, bot::{support::Support,Bot}};
 
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
 pub type Command = poise::Command<Bot, CommandError>;

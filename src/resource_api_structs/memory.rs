@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use serde::Deserialize;
 use reqwest::Response;
 use size::Size;
-use crate::{mprober_api::schemas::MProberResponse};
+use crate::{resource_api::schemas::ResourceApiResponse};
 use super::shared_traits::{Resource, Load, NumStringOrSize, FieldsToArray};
 #[derive(Debug, Deserialize, Clone)]
 pub struct Memory<T:NumStringOrSize> {
@@ -34,7 +34,7 @@ impl Resource for MemoryAndSwap<u64> {}
 #[async_trait]
 impl Load for MemoryAndSwap<u64> {
     async fn load(data: Response) -> MemoryAndSwap<u64> {
-        let mprober_response = match data.json::<MProberResponse<MemoryAndSwap<u64>>>().await {
+        let mprober_response = match data.json::<ResourceApiResponse<MemoryAndSwap<u64>>>().await {
             Ok(memory) => memory,
             Err(e) => {
                 panic!("error parsing cpu data: #{}", e);

@@ -4,9 +4,9 @@ use dotenv::{dotenv};
 use entity::target_server::Model;
 use serde::Deserialize;
 use tokio::{time};
-use crate::{mprober_api::{schemas::Endpoints}};
+use crate::{resource_api::{schemas::Endpoints}};
 #[derive(Debug, Deserialize, Clone)]
-pub struct MProberConfigs {
+pub struct ResourceApiConfigs {
     pub address: String,
     pub api_key: Option<i32>,
     pub auth: bool,
@@ -14,8 +14,8 @@ pub struct MProberConfigs {
     pub polling_frequency: time::Duration,
 }
 
-impl MProberConfigs {
-    pub fn load(target_server: &Model) -> MProberConfigs {
+impl ResourceApiConfigs {
+    pub fn load(target_server: &Model) -> ResourceApiConfigs {
         Self::env_vars();
 
         let address = target_server.address.clone();
@@ -27,7 +27,7 @@ impl MProberConfigs {
         let port = target_server.port.clone();
         let polling_frequency = Self::polling_frequency();
 
-        MProberConfigs { 
+        ResourceApiConfigs { 
             address,
             api_key,
             auth,

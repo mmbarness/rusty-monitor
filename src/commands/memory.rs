@@ -4,8 +4,8 @@ use crate::bot::{
 };
 use crate::Error;
 use crate::bot::defer::Defer;
-use crate::mprober_api_resources;
-use mprober_api_resources::{
+use crate::resource_api_structs;
+use resource_api_structs::{
     memory::{
         Memory,
         Threshold,
@@ -37,9 +37,9 @@ async fn all(
     Support::defer(&ctx).await;
 
     let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
-    let mprober_api = invo_data.mprober_api;
+    let resource_api = invo_data.resource_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&invo_data.target_server).await;
+    let memory_and_swap = resource_api.requester.memory(&invo_data.target_server).await;
 
     let formatted_fields = memory_and_swap.responses();
     let fields_array = formatted_fields.fields_to_array();
@@ -63,9 +63,9 @@ async fn free(
     Support::defer(&ctx).await;
 
     let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
-    let mprober_api = invo_data.mprober_api;
+    let resource_api = invo_data.resource_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&invo_data.target_server).await;
+    let memory_and_swap = resource_api.requester.memory(&invo_data.target_server).await;
     let formatted_mem_and_swap = memory_and_swap.responses();
     
     let response = 
@@ -91,9 +91,9 @@ async fn cache(
     Support::defer(&ctx).await;
 
     let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
-    let mprober_api = invo_data.mprober_api;
+    let resource_api = invo_data.resource_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&invo_data.target_server).await;
+    let memory_and_swap = resource_api.requester.memory(&invo_data.target_server).await;
     let formatted_mem_and_swap = memory_and_swap.format_all_fields();
 
     let response = 
@@ -119,9 +119,9 @@ async fn swap(
     Support::defer(&ctx).await;
 
     let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
-    let mprober_api = invo_data.mprober_api;
+    let resource_api = invo_data.resource_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&invo_data.target_server).await;
+    let memory_and_swap = resource_api.requester.memory(&invo_data.target_server).await;
     let formatted_fields = memory_and_swap.swap.responses();
     let fields_array = formatted_fields.fields_to_array();
     
@@ -156,9 +156,9 @@ async fn in_the_red(
     Support::defer(&ctx).await;
 
     let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
-    let mprober_api = invo_data.mprober_api;
+    let resource_api = invo_data.resource_api;
             
-    let memory_and_swap = mprober_api.requester.memory(&invo_data.target_server).await;
+    let memory_and_swap = resource_api.requester.memory(&invo_data.target_server).await;
     
     let memory = &memory_and_swap.memory;
     let memory_ratio =  Memory::ratio(&memory.used, &memory.total);
