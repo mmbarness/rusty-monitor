@@ -1,30 +1,58 @@
 use dotenv::{ dotenv };
 use gnomeutils::serenity::{GuildId};
+
 #[derive(Debug, Clone)]
-pub struct BotConfig {
-    pub token: String,
-    pub environment: String,
+pub struct Config {
+    pub database_url: String,
+    pub environment: Environment,
     pub prefix: String,
+    pub token: String,
     pub guild_id: GuildId,
 }
 
-impl BotConfig {
+#[derive(Debug, Clone)]
+pub enum Environment {
+    Dev,
+    Prod,
+    Test
+}
 
-    pub fn load () -> BotConfig {
+impl Environment {
+    pub fn match_env(unvalidated_env: &str) -> Environment {
+        match unvalidated_env {
+            "dev" => Environment::Dev,
+            "prod" => Environment::Prod,
+            "test" => Environment::Test,
+            _ => panic!("Error parsing environment arg")                   
+        }
+    }
+    pub fn to_string(env: Environment) -> String {
+        match env {
+            Environment::Dev => "dev".to_string(),
+            Environment::Prod => "prod".to_string(),
+            Environment::Test => "test".to_string(),
+        }
+    }
+}
 
+impl Config {
+
+    pub async fn load () -> Config {
         let args:Vec<String> = Self::env_vars();
 
-        let environment = Self::mode(&args);
+        let environment = Self::environment(&args);
         let guild_id = Self::guild_id();
         let prefix = Self::prefix(&environment);
         let token = Self::token(&environment);
+        let database_url = Self::db_url(&environment);
 
         let parsed_guild_id = GuildId(guild_id);
 
-        println!("running in {} mode, with a command prefix of {}", environment, prefix);
+        println!("running in {} mode, with a command prefix of {}", Environment::to_string(environment.clone()), prefix);
 
-        BotConfig {
+        Config {
             environment,
+            database_url,
             guild_id: parsed_guild_id,
             prefix,
             token,
@@ -41,18 +69,42 @@ impl BotConfig {
             }
         };
         let args = std::env::args().collect();
+        println!("args: {:?}", args);
         args
     }
 
-    fn prefix(mode:&String) -> String {
-        match mode.as_str() {
-            "dev" => "~~".to_string(),
-            "prod" => "~".to_string(),
+    fn db_url(environment: &Environment) -> String {
+        match environment {
+            Environment::Dev => match std::env::var("DEV_DATABASE_URL") {
+                Ok(url) => url,
+                Err(_) => {
+                    panic!("Error accessing DATABASE_USERNAME in .env")
+                }
+            },
+            Environment::Test => match std::env::var("TEST_DATABASE_URL") {
+                Ok(url) => url,
+                Err(_) => {
+                    panic!("Error accessing DATABASE_USERNAME in .env")
+                }
+            },
+            Environment::Prod => match std::env::var("PROD_DATABASE_URL") {
+                Ok(url) => url,
+                Err(_) => {
+                    panic!("Error accessing DATABASE_USERNAME in .env")
+                }
+            }
+        }
+    }
+
+    fn prefix(mode:&Environment) -> String {
+        match mode {
+            Environment::Dev => "~~".to_string(),
+            Environment::Prod => "~".to_string(),
             _ => panic!("Error parsing environment arg")  
         }
     }
 
-    fn mode(args: &Vec<String>) -> String {
+    fn environment(args: &Vec<String>) -> Environment {
         let environment = args.iter().find(|ele| match ele.as_str() {
             "dev" => true,
             "prod" => true,
@@ -60,11 +112,7 @@ impl BotConfig {
         });
 
         return match environment {
-            Some(env) => match env.as_str() {
-                "dev" => "dev".to_string(),
-                "prod" => "prod".to_string(),
-                _ => panic!("Error parsing environment arg")                   
-            }
+            Some(env) => Environment::match_env(env),
             None => panic!("Did you provide an environment as an argument? Options are 'prod' or 'dev'")
         };
     }
@@ -78,15 +126,15 @@ impl BotConfig {
         }
     }
 
-    fn token(environment:&String) -> String {    
-        return match environment.as_str() {
-            "dev" => match std::env::var("DEV_DISCORD_TOKEN") {
+    fn token(environment:&Environment) -> String {    
+        return match environment {
+            Environment::Dev => match std::env::var("DEV_DISCORD_TOKEN") {
                 Ok(token) => token,
                 Err(_) => {
                     panic!("Error accessing bot token in .env")
                 }
             }
-            "prod" => match std::env::var("PROD_DISCORD_TOKEN") {
+            Environment::Prod => match std::env::var("PROD_DISCORD_TOKEN") {
                 Ok(token) => token,
                 Err(_) => {
                     panic!("Error accessing bot token in .env")

@@ -1,15 +1,30 @@
-use crate::{structs::Context, Error, bot_support::bot_support::BotSupport, mprober_api_resources::{cpu::CPULoad, shared_traits::Compute}};
-use std::convert::From;
+use crate::{
+    structs::{
+        Context,
+        Error as CommandError
+    },
+    bot::{
+        support::Support,
+        defer::Defer,
+        invocation_data::InvocationData
+    }, 
+    resource_api_structs::{
+        cpu::CPULoad,
+        shared_traits::Compute
+    },
+};
+use std::{convert::From};
 
 #[poise::command(track_edits, slash_command)]
 pub async fn cpu_info(
     ctx: Context<'_>,
     _command: Option<String>,
-) -> Result<(), Error> {
+) -> Result<(), CommandError> {
 
-    let mprober_api = &ctx.data().mprober_api;
+    let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
+    let resource_api = invo_data.resource_api;
 
-    let cpus = mprober_api.requester.cpus().await;
+    let cpus = resource_api.requester.cpus().await;
     // going to for now not handle multi-cpu systems
     let cpu_1 = match cpus.cpus.first() {
         Some(cpu) => cpu,
@@ -46,13 +61,14 @@ pub async fn cpu_info(
 pub async fn cpu_load(
     ctx: Context<'_>,
     _command: Option<String>,
-) -> Result<(), Error> {
+) -> Result<(), CommandError> {
 
-    BotSupport::defer(&ctx).await;
+    Support::defer(&ctx).await;
 
-    let mprober_api = &ctx.data().mprober_api;
+    let invo_data = InvocationData::validate(ctx).await.expect("unable to pull valid data out of invocation_data");
+    let resource_api = invo_data.resource_api;
             
-    let cpus = mprober_api.requester.cpu_load().await;
+    let cpus = resource_api.requester.cpu_load().await;
     let cpus_stat = &cpus.cpus_stat;
     let cpus_average = CPULoad::avg(cpus_stat);
     let cpus_average_resp = format!("average load across cores: {}", CPULoad::percentage(&cpus_average));

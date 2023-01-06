@@ -1,0 +1,12 @@
+[package]
+name = "entity"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "entity"
+path = "src/mod.rs"
+
+[dependencies.sea-orm]
+sea-orm = { version = "0.10.6", features = [ "postgres-array", "sqlx-postgres", "sea-orm-macros" ]}

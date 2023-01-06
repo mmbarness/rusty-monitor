@@ -1,34 +1,53 @@
 use core::panic;
-use std::{collections::HashMap};
+use std::{collections::HashMap, error, fmt};
 use dotenv::{dotenv};
+use entity::target_server::{ActiveModel};
+use serde::Deserialize;
 use tokio::{time};
-use crate::{mprober_api::{schemas::Endpoints}};
-#[derive(Debug, Clone)]
-pub struct MProberConfigs {
+use crate::{resource_api::{schemas::Endpoints}, Error};
+#[derive(Debug, Deserialize, Clone)]
+pub struct ResourceApiConfigs {
     pub address: String,
-    pub api_key: String,
-    pub port: u64,
+    pub api_key: Option<i32>,
+    pub auth: bool,
+    pub port: i32,
     pub polling_frequency: time::Duration,
 }
 
-impl MProberConfigs {
-    pub fn load() -> MProberConfigs {
+#[derive(Debug, Clone)]
+struct ActiveModelParseError;
+
+impl fmt::Display for ActiveModelParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "invalid first item to double")
+    }
+}
+
+impl error::Error for ActiveModelParseError {}
+
+impl ResourceApiConfigs {
+    pub fn load(target_server: &ActiveModel) -> Result<ResourceApiConfigs, Error> {
         Self::env_vars();
 
-        let address = Self::address();
-        let api_key = Self::api_key();
-        let port = Self::port();
+        let address = target_server.address.clone().unwrap();
+        let auth = target_server.auth.clone().unwrap();
+        let api_key = match auth {
+            true =>  target_server.auth_key.clone().unwrap(),
+            false => None,
+        };
+        let port = target_server.port.clone().unwrap();
         let polling_frequency = Self::polling_frequency();
 
-        MProberConfigs { 
+        Ok(ResourceApiConfigs { 
             address,
             api_key,
+            auth,
             port,
             polling_frequency,
-        }
+        })
     }
 
-    pub fn build_address(endpoint: Endpoints) -> String {
+    pub fn build_address(address: &String, port: &String, endpoint: Endpoints) -> String {
         let binding = Self::endpoints();
         let endpoint_str = match binding.get(&endpoint) {
             Some(str) => str,
@@ -36,7 +55,9 @@ impl MProberConfigs {
                 panic!("endpoint not in endpoints hashmap")
             }
         };
-        Self::address().clone() + &endpoint_str.clone()
+        let full_address = address.clone() + ":" + &port.clone() + &endpoint_str.clone();
+        println!("address: {}", full_address);
+        address.clone() + ":" + &port.clone() + &endpoint_str.clone()
     }
 
     fn endpoints() -> HashMap<Endpoints, String> {
@@ -65,24 +86,6 @@ impl MProberConfigs {
         };
     }
 
-    fn address() -> String {    
-        match std::env::var("ADDRESS") {
-            Ok(address) => address,
-            Err(_) => {
-                panic!("Error accessing server address in .env")
-            }
-        }
-    }
-
-    fn api_key() -> String {    
-        match std::env::var("API_KEY") {
-            Ok(api_key) => api_key,
-            Err(_) => {
-                panic!("Error accessing api key in .env")
-            }
-        }
-    }
-
     fn polling_frequency() -> time::Duration {    
         let ok_val = match std::env::var("POLLING_FREQUENCY") {
             Ok(address) => address,
@@ -102,13 +105,5 @@ impl MProberConfigs {
 
         return duration;
     }
-    
-    fn port() -> u64 {    
-        return match std::env::var("PORT") {
-            Ok(address) => address.parse::<u64>().expect("Error parsing num from PORT value"),
-            Err(_) => {
-                panic!("Error accessing server address in .env")
-            }
-        }
-    }
+
 }

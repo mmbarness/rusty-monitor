@@ -1,8 +1,9 @@
-use super::bot_support::BotSupport;
+use super::support::Support;
 use crate::structs::Context;
 
-impl BotSupport {
-    pub async fn defer(ctx: &Context<'_>) {
+#[async_trait::async_trait]
+pub trait Defer {
+    async fn defer(ctx: &Context<'_>) {
         match ctx.defer().await {
             Ok(_) => {
                 println!("deferring response...")
@@ -12,4 +13,7 @@ impl BotSupport {
             }
         }
     }
+
 }
+
+impl Defer for Support {}

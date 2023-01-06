@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use serde::Deserialize;
 use reqwest::Response;
 use tokio::sync::oneshot;
-use crate::{mprober_api::schemas::MProberResponse, thread_channel::wrapper::{Wrap, Wrapper}};
+use crate::{resource_api::schemas::ResourceApiResponse, thread_channel::wrapper::{Wrap, Wrapper}};
 use super::shared_traits::{Resource, Load};
 
 #[derive(Debug, Deserialize, Clone)]
@@ -41,15 +41,13 @@ impl Resource for CPUs {}
 #[async_trait]
 impl Load for CPUs{
     async fn load(data: Response) -> CPUs {
-        let mprober_response = match data.json::<MProberResponse<CPUs>>().await {
+        let mprober_response = match data.json::<ResourceApiResponse<CPUs>>().await {
             Ok(cpu) => cpu,
             Err(e) => {
                 panic!("error parsing cpu data: #{}", e);
             }
         };
-        let cpu = mprober_response.data;
-
-        return cpu;
+        return mprober_response.data;
     }
 }
 
@@ -63,15 +61,13 @@ impl Wrap for CPUs {
 #[async_trait]
 impl Load for CPULoad {
     async fn load(data: Response) -> CPULoad {
-        let mprober_response = match data.json::<MProberResponse<CPULoad>>().await {
+        let mprober_response = match data.json::<ResourceApiResponse<CPULoad>>().await {
             Ok(cpu) => cpu,
             Err(e) => {
                 panic!("error parsing cpu data: #{}", e);
             }
         };
-        let cpu = mprober_response.data;
-
-        return cpu;
+        return mprober_response.data;;
     }
 }
 
