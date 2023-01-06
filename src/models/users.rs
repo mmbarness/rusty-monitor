@@ -1,7 +1,7 @@
 use chrono::prelude::*;
-use entity::users::{Entity as Users, self, ActiveModel, Model};
+use entity::users::{Entity as Users, self};
 use migration::{DbErr};
-use sea_orm::{DatabaseConnection, EntityTrait, ActiveValue, ActiveModelTrait, QueryFilter, ColumnTrait, ActiveModelBehavior};
+use sea_orm::{DatabaseConnection, EntityTrait, ActiveValue, ActiveModelTrait, QueryFilter, ColumnTrait};
 use crate::models::target_server::Find as FindTargetServer;
 use sea_orm::TryIntoModel;
 // Find by primary key

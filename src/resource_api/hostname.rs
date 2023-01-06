@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use reqwest::{Response};
 use crate::Error;
 use crate::configs::resource_api_configs::ResourceApiConfigs;

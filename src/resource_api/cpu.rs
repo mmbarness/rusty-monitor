@@ -1,4 +1,3 @@
-use entity::target_server::{Model, ActiveModel};
 use reqwest::{Response};
 use crate::configs::resource_api_configs::ResourceApiConfigs;
 use crate::{resource_api_structs::shared_traits::Load};

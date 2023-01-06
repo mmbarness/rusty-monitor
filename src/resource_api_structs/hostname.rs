@@ -1,9 +1,5 @@
-use std::collections::HashMap;
-
 use reqwest::Response;
 use serde::Deserialize;
-use crate::resource_api::schemas::ResourceApiResponse;
-
 use super::shared_traits::Resource;
 
 #[derive(Debug, Deserialize, Clone)]

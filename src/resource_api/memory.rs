@@ -1,4 +1,3 @@
-use entity::target_server::Model;
 use reqwest::{Response};
 use crate::configs::resource_api_configs::ResourceApiConfigs;
 use crate::resource_api_structs::memory::{MemoryAndSwap};

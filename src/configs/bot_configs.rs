@@ -1,6 +1,5 @@
 use dotenv::{ dotenv };
 use gnomeutils::serenity::{GuildId};
-use crate::database::initialize::Database;
 
 #[derive(Debug, Clone)]
 pub struct Config {
