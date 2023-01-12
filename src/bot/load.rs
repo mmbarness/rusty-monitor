@@ -7,7 +7,7 @@ use super::{support::Support, invocation_data::InvocationData, Bot, query_db::Qu
 pub trait Load {
     async fn on_setup() -> Result<Bot, Error> {
         let configs = Config::load().await;
-        let database = Database::load(&configs.database_url).await;
+        let database = Database::load(&configs.database_credentials, &configs.environment).await;
 
         Ok(Bot {
             configs,
