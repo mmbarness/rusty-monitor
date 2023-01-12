@@ -1,13 +1,13 @@
 use dotenv::{ dotenv };
-use gnomeutils::serenity::{GuildId};
+
+use crate::database::initialize::DatabaseCredentials;
 
 #[derive(Debug, Clone)]
 pub struct Config {
-    pub database_url: String,
+    pub database_credentials: DatabaseCredentials,
     pub environment: Environment,
     pub prefix: String,
     pub token: String,
-    pub guild_id: GuildId,
 }
 
 #[derive(Debug, Clone)]
@@ -41,19 +41,19 @@ impl Config {
         let args:Vec<String> = Self::env_vars();
 
         let environment = Self::environment(&args);
-        let guild_id = Self::guild_id();
         let prefix = Self::prefix(&environment);
         let token = Self::token(&environment);
-        let database_url = Self::db_url(&environment);
-
-        let parsed_guild_id = GuildId(guild_id);
+        
+        let database_credentials = DatabaseCredentials {
+            username: Self::db_username(),
+            password: Self::db_password()
+        };
 
         println!("running in {} mode, with a command prefix of {}", Environment::to_string(environment.clone()), prefix);
 
         Config {
             environment,
-            database_url,
-            guild_id: parsed_guild_id,
+            database_credentials,
             prefix,
             token,
         }
@@ -73,25 +73,20 @@ impl Config {
         args
     }
 
-    fn db_url(environment: &Environment) -> String {
-        match environment {
-            Environment::Dev => match std::env::var("DEV_DATABASE_URL") {
-                Ok(url) => url,
-                Err(_) => {
-                    panic!("Error accessing DATABASE_USERNAME in .env")
-                }
-            },
-            Environment::Test => match std::env::var("TEST_DATABASE_URL") {
-                Ok(url) => url,
-                Err(_) => {
-                    panic!("Error accessing DATABASE_USERNAME in .env")
-                }
-            },
-            Environment::Prod => match std::env::var("PROD_DATABASE_URL") {
-                Ok(url) => url,
-                Err(_) => {
-                    panic!("Error accessing DATABASE_USERNAME in .env")
-                }
+    fn db_username() -> String {
+        match std::env::var("DATABASE_USERNAME") {
+            Ok(url) => url,
+            Err(_) => {
+                panic!("Error accessing DATABASE_USERNAME in .env")
+            }
+        }
+    }
+
+    fn db_password() -> String {
+        match std::env::var("DATABASE_PASSWORD") {
+            Ok(url) => url,
+            Err(_) => {
+                panic!("Error accessing DATABASE_PASSWORD in .env")
             }
         }
     }
@@ -115,15 +110,6 @@ impl Config {
             Some(env) => Environment::match_env(env),
             None => panic!("Did you provide an environment as an argument? Options are 'prod' or 'dev'")
         };
-    }
-
-    fn guild_id() -> u64 {
-        return match std::env::var("DISCORD_GUILD_ID") {
-            Ok(token) => token.parse::<u64>().expect("unable to correctly parse guild_id"),
-            Err(_) => {
-                panic!("Error accessing discord guild id in .env")
-            }
-        }
     }
 
     fn token(environment:&Environment) -> String {    
